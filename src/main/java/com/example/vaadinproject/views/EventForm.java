@@ -33,7 +33,7 @@ import java.util.List;
 @PageTitle("Create Event")
 @AnonymousAllowed
 public class EventForm extends VerticalLayout {
-    protected final Binder<Event> binder = new Binder<>(Event.class);
+    protected final Binder<Event> binder = new BeanValidationBinder<>(Event.class);
 
     private Event event;
 
@@ -49,8 +49,6 @@ public class EventForm extends VerticalLayout {
     private final ComboBox<Status> statut = new ComboBox<>("Status");
 
     private final Button save = new Button("Save");
-    private final Button add = new Button("Add");
-
     private final Button delete = new Button("Delete");
     private final Button cancel = new Button("Cancel");
 
@@ -97,24 +95,25 @@ public class EventForm extends VerticalLayout {
     }
     public void setEvent(Event event) {
         this.event = event;
-        binder.setBean(event);
+        binder.setBean(event);  // This will now work correctly
+
+        // Update delete button visibility
+        if (delete != null) {
+            delete.setVisible(event != null && event.getId() != null);
+        }
     }
 
     private Component createButtonLayout() {
+        // Style the buttons
+        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+        save.addClickShortcut(Key.ENTER);
+        cancel.addClickShortcut(Key.ESCAPE);
 
         save.addClickListener(e -> {
             if (binder.validate().isOk()) {
                 fireEvent(new SaveEvent(this, binder.getBean()));
-            }
-        });
-
-        add.addClickListener(e -> {
-            System.out.println(">>> ADD CLICKED");
-
-            if (binder.validate().isOk()) {
-                System.out.println(">>> bean created");
-
-                fireEvent(new CreateNewEvent(this, binder.getBean()));
             }
         });
 
@@ -126,11 +125,11 @@ public class EventForm extends VerticalLayout {
 
         cancel.addClickListener(e -> fireEvent(new CloseEvent(this)));
 
+        // Show delete only when editing existing event
+        delete.setVisible(event != null && event.getId() != null);
 
-
-
-
-        return new HorizontalLayout(add, save, delete, cancel);
+        // Return only save, delete, and cancel (remove "add" button)
+        return new HorizontalLayout(save, delete, cancel);
     }
 
 
@@ -150,11 +149,7 @@ public class EventForm extends VerticalLayout {
             return event;
         }
     }
-    public static class CreateNewEvent extends OpFormEvent {
-        public CreateNewEvent(EventForm source, Event event) {
-            super(source, event);
-        }
-    }
+
 
     public static class SaveEvent extends OpFormEvent {
         public SaveEvent(EventForm source, Event event) {

@@ -58,7 +58,7 @@ public class User {
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> reservations = new ArrayList<>();
 
-    protected User() {}
+    public User() {}
 
     public User(String nom, String prenom, String email, String password, Role role, String telephone) {
         this.nom = nom;

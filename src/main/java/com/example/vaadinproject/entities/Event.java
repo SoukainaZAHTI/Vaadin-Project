@@ -66,8 +66,8 @@ public class Event {
 
     private LocalDateTime dateModification;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organisateur_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "organisateur_id")
     private User organisateur;
 
     @OneToMany(mappedBy = "evenement", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,60 +1,113 @@
 package com.example.vaadinproject.views;
 
+import com.example.vaadinproject.entities.User;
+import com.example.vaadinproject.services.SessionService;
+import com.example.vaadinproject.services.UserService;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.component.textfield.EmailField;
+import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.flow.component.login.LoginI18n;
+import com.vaadin.flow.server.VaadinSession;
 
+import java.util.Optional;
 
 @Route("login")
 @PageTitle("Login")
-@AnonymousAllowed
-public class LoginView extends VerticalLayout implements BeforeEnterObserver {
+public class LoginView extends VerticalLayout {
 
-    private final LoginForm login = new LoginForm();
+    private final UserService userService;
+    private final SessionService sessionService;
 
-    public LoginView() {
+    private EmailField email = new EmailField("Email");
+    private PasswordField password = new PasswordField("Password");
+    private Button loginButton = new Button("Login");
+
+    public LoginView(UserService userService, SessionService sessionService) {
+
+        VerticalLayout loginCard = new VerticalLayout();
+        loginCard.setWidth("600px");
+        loginCard.getStyle()
+                .set("background", "white")
+                .set("padding", "30px")
+                .set("border-radius", "30px")
+                .set("box-shadow", "0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1)");
+
+        this.userService = userService;
+        this.sessionService = sessionService;
+
+
         addClassName("login-view");
         setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
 
-        // Configure login form
-        LoginI18n i18n = LoginI18n.createDefault();
+        // Configure fields
+        email.setWidthFull();
+        email.setPlaceholder("Enter your email");
+        email.setClearButtonVisible(true);
 
-        i18n.getForm().setUsername("Email");
-        i18n.getForm().setPassword("Password");
-        i18n.getForm().setSubmit("Login");
+        password.setWidthFull();
+        password.setPlaceholder("Enter your password");
 
-        i18n.getErrorMessage().setTitle("Connexion Error");
-        i18n.getErrorMessage().setMessage("Email or Password Incorrect");
-
-        login.setI18n(i18n);
-
-
+        loginButton.setWidthFull();
+        loginButton.addClickListener(e -> handleLogin());
+        loginButton.getStyle()
+                .set("background", "#A14C3A")
+                .set("color", "white")
+                .set("font-weight", "bold")
+                .set("font-size", "16px")
+                .set("padding", "12px")
+                .set("border", "none")
+                .set("border-radius", "6px")
+                .set("cursor", "pointer")
+                .set("margin-top", "10px");
+        loginButton.addClickShortcut(Key.ENTER);
         // Registration link
         Anchor registerLink = new Anchor("/register", "Don't have an account? Register Now!");
+        loginCard.add(email, password  , loginButton, registerLink);
 
         add(
-                new H1("Login To Reservations Space"),
-                login,
-                registerLink
+                new H1("Welcome Back To EventHub!"),
+                loginCard
         );
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (event.getLocation()
-                .getQueryParameters()
-                .getParameters()
-                .containsKey("error")) {
-            login.setError(true);
+
+    private void handleLogin() {
+        Optional<User> userOpt = userService.login(email.getValue(), password.getValue());
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+
+            // Store user in session
+            sessionService.setCurrentUser(user);
+
+            // Redirect based on role
+            redirectBasedOnRole(user);
+        } else {
+            Notification.show("Invalid email or password", 3000, Notification.Position.MIDDLE);
         }
     }
+    private void redirectBasedOnRole(User user) {
+        switch (user.getRole()) {
+            case ADMIN:
+                UI.getCurrent().navigate("admin");
+                break;
+            case ORGANIZER:
+                UI.getCurrent().navigate("organizer");
+                break;
+            case CLIENT:
+                UI.getCurrent().navigate("client/dashboard");
+                break;
+        }
+}
 }

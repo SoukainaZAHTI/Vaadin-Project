@@ -1,8 +1,10 @@
 package com.example.vaadinproject.views;
 
 import com.example.vaadinproject.entities.Event;
+import com.example.vaadinproject.entities.User;
 import com.example.vaadinproject.repositories.EventRepository;
 import com.example.vaadinproject.services.EventService;
+import com.example.vaadinproject.services.SessionService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -10,6 +12,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
@@ -17,10 +21,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 
-@Route("events")
+@Route("organizer/events")
 @PageTitle("Events")
 @AnonymousAllowed
-public class EventListView extends VerticalLayout {
+public class EventListView extends VerticalLayout implements BeforeEnterObserver {
+
+    private final SessionService sessionService;
 
     private final Grid<Event> grid = new Grid<>(Event.class, false);
     private final TextField filterText = new TextField();
@@ -28,8 +34,10 @@ public class EventListView extends VerticalLayout {
     EventService service;
 
     @Autowired
-    public EventListView(EventService service) {
+    public EventListView(EventService service, SessionService sessionService) {
         this.service = service;
+        this.sessionService = sessionService;
+
 
         addClassName("event-list-view");
         setSizeFull();
@@ -43,41 +51,79 @@ public class EventListView extends VerticalLayout {
     }
 
     private void updateList() {
-        grid.setItems(service.findAllEvents(filterText.getValue()));
+        // Check if user is logged in and is an organizer
+        if (sessionService.isLoggedIn() && sessionService.isOrganizer()) {
+            // Show only current organizer's events
+            Long organizerId = sessionService.getCurrentUser().getId();
 
+            if (filterText.getValue() == null || filterText.getValue().isEmpty()) {
+                grid.setItems(service.findEventsByOrganizer(organizerId));
+            } else {
+                // Filter within organizer's own events
+                grid.setItems(
+                        service.findEventsByOrganizer(organizerId).stream()
+                                .filter(e -> e.getTitre().toLowerCase()
+                                        .contains(filterText.getValue().toLowerCase()))
+                                .toList()
+                );
+            }
+        } else {
+            // For non-organizers or not logged in, show all events
+            grid.setItems(service.findAllEvents(filterText.getValue()));
+        }
     }
 
     private void configureForm() {
         form = new EventForm(service.findAllEvents());
         form.setWidth("25em");
+        form.setVisible(false); // Hide by default
 
         form.addListener(EventForm.SaveEvent.class, this::saveEvent);
         form.addListener(EventForm.DeleteEvent.class, this::deleteEvent);
-        form.addListener(EventForm.CreateNewEvent.class, this::CreateNewEvent);
-
-
+        form.addListener(EventForm.CloseEvent.class, e -> closeEditor());
     }
 
-    private void CreateNewEvent(EventForm.CreateNewEvent event) {
-        // Save to database
-        service.saveEvent(event.getEvent());
-
-        // Update UI list
-        updateList();
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (!sessionService.isLoggedIn() || !sessionService.isOrganizer()) {
+            event.rerouteTo("login");
+        }
     }
 
     private void saveEvent(EventForm.SaveEvent event) {
-        service.saveEvent(event.getEvent());
-        updateList();
-    }
+        Event evt = event.getEvent();
 
+        // Auto-assign current organizer to new events
+        if (evt.getId() == null && sessionService.isLoggedIn()) {
+            evt.setOrganisateur(sessionService.getCurrentUser());
+        }
+
+        service.saveEvent(evt);
+        updateList();
+        closeEditor();
+    }
     private void deleteEvent(EventForm.DeleteEvent event) {
         service.deleteEvent(event.getEvent());
         updateList();
+        closeEditor();
+    }
+
+    private void closeEditor() {
+        form.setEvent(null);
+        form.setVisible(false);
+        removeClassName("editing");
     }
 
 
-
+    private void editEvent(Event event) {
+        if (event == null) {
+            closeEditor();
+        } else {
+            form.setEvent(event);
+            form.setVisible(true);
+            addClassName("editing");
+        }
+    }
 
 
     private Component getContent() {
@@ -121,14 +167,26 @@ public class EventListView extends VerticalLayout {
                 .setHeader("Ville")
                 .setAutoWidth(true);
 
-        grid.addColumn(Event::getOrganisateur)
+        grid.addColumn(event -> {
+                    User organisateur = event.getOrganisateur();
+                    return organisateur != null ? organisateur.getNomComplet() : "N/A";
+                })
                 .setHeader("Organisateur")
                 .setAutoWidth(true);
 
         grid.addColumn(Event::getStatut)
                 .setHeader("Statut")
                 .setAutoWidth(true);
+
+        grid.asSingleSelect().addValueChangeListener(event -> {
+            if (event.getValue() != null) {
+                editEvent(event.getValue());
+            } else {
+                closeEditor();
+            }
+        });
     }
+
 
     private HorizontalLayout getToolbar() {
         filterText.setPlaceholder("Filter by title...");
@@ -145,7 +203,8 @@ public class EventListView extends VerticalLayout {
     }
     private void addEvent() {
         grid.asSingleSelect().clear();
-        form.setEvent(new Event());
+        Event newEvent = new Event();
+        form.setEvent(newEvent);
         form.setVisible(true);
         addClassName("editing");
     }

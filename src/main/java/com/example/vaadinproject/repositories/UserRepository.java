@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -19,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "where lower(c.prenom) like lower(concat('%', :searchTerm, '%')) " +
             "or lower(c.nom) like lower(concat('%', :searchTerm, '%'))")
      List<User> search(@Param("searchTerm") String searchTerm);
+    Optional<User> findByEmail(String email);
+
 }

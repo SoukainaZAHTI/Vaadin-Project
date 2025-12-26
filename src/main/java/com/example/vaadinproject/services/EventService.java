@@ -48,6 +48,9 @@ public class EventService {
             return eventRepository.search(filterText);
         }
     }
+    public List<Event> findEventsByOrganizer(Long organizerId) {
+        return eventRepository.findByOrganisateurId(organizerId);
+    }
     public List<Event> searchPublicEvents(String keyword,
                                           Category category,
                                           String city,
