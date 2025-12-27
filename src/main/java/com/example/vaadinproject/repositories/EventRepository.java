@@ -20,6 +20,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "or lower(e.description) like lower(concat('%', :searchTerm, '%'))")
     List<Event> search(@Param("searchTerm") String searchTerm);
     List<Event> findByOrganisateurId(Long organizerId);
+
     /* ===== BASIC FILTERS ===== */
     List<Event> findByStatut(Status statut);
 

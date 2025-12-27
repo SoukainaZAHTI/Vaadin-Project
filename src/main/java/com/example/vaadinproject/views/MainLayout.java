@@ -29,7 +29,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void createHeader() {
-        Image logo = new Image("https://private-user-images.githubusercontent.com/214033788/530433296-10326aaa-7231-4cb6-b43e-8e0ae2f58e4a.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjY3OTMxMDAsIm5iZiI6MTc2Njc5MjgwMCwicGF0aCI6Ii8yMTQwMzM3ODgvNTMwNDMzMjk2LTEwMzI2YWFhLTcyMzEtNGNiNi1iNDNlLThlMGFlMmY1OGU0YS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMjI2JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTIyNlQyMzQ2NDBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yODRiODA0ZDhjMzcwNWUwNTZlNDMxMWE0NWEwYTFkZjczZjliZDQyYjJkMzYzNDVmM2MxZTFiYjVhMjI3MzdlJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.HlfezVVFRWDIfF5z1zH_id0rqzVjrRawqGXCyJdZdkw", "EventHub Logo");
+        Image logo = new Image("https://github.com/SoukainaZAHTI/Resources/blob/main/logo.png?raw=true", "EventHub Logo");
         logo.setHeight("20%"); // Reduced height for better header proportions
         logo.getStyle()
                 .set("margin", "0")
@@ -54,14 +54,14 @@ public class MainLayout extends AppLayout {
             logoutBtn.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
             logoutBtn.addClickListener(e -> {
                 sessionService.logout();
-                UI.getCurrent().navigate("home");
-                UI.getCurrent().getPage().reload();
+                UI.getCurrent().getPage().setLocation("/login"); // Use setLocation for full page reload
             });
 
             headerRight.add(profileButton, logoutBtn);
         } else {
             Button loginBtn = new Button("Login", VaadinIcon.SIGN_IN.create());
-            loginBtn.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+            loginBtn.getStyle().set("color", "white")
+                    .set("background-color", "#5E6E28");
             loginBtn.addClickListener(e -> UI.getCurrent().navigate("login"));
 
             Button registerBtn = new Button("Register", VaadinIcon.USER.create());
@@ -76,7 +76,9 @@ public class MainLayout extends AppLayout {
         DrawerToggle toggle = new DrawerToggle();
         toggle.getStyle()
                 .set("color", "white")
-                .set("flex-shrink", "0");
+                .set("flex-shrink", "0")
+                .set("font-size", "32px")
+                .set("cursor", "pointer");
 
         // Create a spacer to push headerRight to the right
         Div spacer = new Div();
@@ -89,7 +91,8 @@ public class MainLayout extends AppLayout {
         header.setPadding(false);
         header.addClassName("header");
         header.getStyle()
-                .set("background-image", "linear-gradient(90deg, #000000, #737373)")
+               // .set("background-image", "linear-gradient(90deg, #000000, #737373)")
+                .set("background-color", "#D8C9A7")
                 .set("padding", "10px 20px")
                 .set("gap", "15px");
 

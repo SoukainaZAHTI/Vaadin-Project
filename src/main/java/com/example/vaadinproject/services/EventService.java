@@ -90,5 +90,12 @@ public class EventService {
                 .filter(event -> event.getStatut() == Status.PUBLIE)
                 .collect(Collectors.toList());
     }
+    public List<Event> findByStatut(Status statut) {
+        return eventRepository.findByStatut(statut);
+    }
+
+    public List<Event> findAll() {
+        return eventRepository.findAll();
+    }
 }
 

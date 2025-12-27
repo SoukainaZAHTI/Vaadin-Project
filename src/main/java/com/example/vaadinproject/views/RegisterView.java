@@ -68,7 +68,7 @@ public class RegisterView extends HorizontalLayout {
         leftSide.setJustifyContentMode(JustifyContentMode.CENTER);
         leftSide.setWidth("50%");
 
-        Image appName = new Image("https://private-user-images.githubusercontent.com/214033788/530433296-10326aaa-7231-4cb6-b43e-8e0ae2f58e4a.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjY3OTMxMDAsIm5iZiI6MTc2Njc5MjgwMCwicGF0aCI6Ii8yMTQwMzM3ODgvNTMwNDMzMjk2LTEwMzI2YWFhLTcyMzEtNGNiNi1iNDNlLThlMGFlMmY1OGU0YS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMjI2JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTIyNlQyMzQ2NDBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yODRiODA0ZDhjMzcwNWUwNTZlNDMxMWE0NWEwYTFkZjczZjliZDQyYjJkMzYzNDVmM2MxZTFiYjVhMjI3MzdlJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.HlfezVVFRWDIfF5z1zH_id0rqzVjrRawqGXCyJdZdkw", "EventHub Logo");
+        Image appName = new Image("https://github.com/SoukainaZAHTI/Resources/blob/main/logo.png?raw=true", "EventHub Logo");
         appName.setHeight("30%"); // Reduced height for better header proportions
         appName.getStyle()
                 .set("margin", "0")
@@ -85,7 +85,7 @@ public class RegisterView extends HorizontalLayout {
                 .set("font-family", "Candara")
                 .set("margin-top", "10px");
 
-        Image illustration = new Image("https://private-user-images.githubusercontent.com/214033788/530430484-bcb4b5e6-4db8-487f-a381-53597f35c100.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjY3OTM4MzIsIm5iZiI6MTc2Njc5MzUzMiwicGF0aCI6Ii8yMTQwMzM3ODgvNTMwNDMwNDg0LWJjYjRiNWU2LTRkYjgtNDg3Zi1hMzgxLTUzNTk3ZjM1YzEwMC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMjI2JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTIyNlQyMzU4NTJaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT04ODUzZmNhNmQwY2MxNTEyY2YxYTMxNDA4N2E5MjRlMWE2MjYyZGEyNmE1Njc3MDExNTc2ODYyMDc1NGZlMWM4JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.uMuICdbYWVeh8oY5nrG1w9K3dv8yV-vM6e3WK2HtJpQ", "Events illustration");
+        Image illustration = new Image("https://github.com/SoukainaZAHTI/Resources/blob/main/illustrationEventHUB.png?raw=true", "Events illustration");
         illustration.setWidth("600px");
         illustration.setHeight("600px");
         //illustration.getStyle().set("margin-top", "10px");

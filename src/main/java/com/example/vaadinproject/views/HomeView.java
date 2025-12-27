@@ -126,7 +126,8 @@ public class HomeView extends VerticalLayout {
         dateFilter.setWidth("200px");
 
         searchButton = new Button("Search");
-        searchButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        searchButton.getStyle().set("background", "#5C6F2B")
+                        .set("color", "white");
         searchButton.getStyle().set("margin-top", "30px");
         searchButton.addClickListener(e -> performSearch());
 
@@ -263,7 +264,8 @@ public class HomeView extends VerticalLayout {
                 .set("font-weight", "bold");
 
         Button detailsBtn = new Button("View Details");
-        detailsBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        detailsBtn.getStyle().set("color", "white")
+                .set("background-color", "#5E6E28");
         detailsBtn.addClickListener(e -> showEventDetails(event));
 
         footer.add(price, detailsBtn);

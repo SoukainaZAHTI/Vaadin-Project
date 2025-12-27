@@ -1,6 +1,7 @@
 package com.example.vaadinproject.repositories;
 
 import com.example.vaadinproject.entities.Event;
+import com.example.vaadinproject.entities.Role;
 import org.springframework.stereotype.Repository;
 
 import com.example.vaadinproject.entities.User;
@@ -23,5 +24,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
      List<User> search(@Param("searchTerm") String searchTerm);
 
     Optional<User> findByEmail(String email);
+    List<User> findByRole(Role role);
 
 }

@@ -46,7 +46,6 @@ public class EventForm extends VerticalLayout {
     private final TextField ville = new TextField("City");
     private final IntegerField capaciteMax = new IntegerField("Max capacity");
     private final NumberField prixUnitaire = new NumberField("Price");
-    private final ComboBox<Status> statut = new ComboBox<>("Status");
 
     private final Button save = new Button("Save");
     private final Button delete = new Button("Delete");
@@ -61,7 +60,6 @@ public class EventForm extends VerticalLayout {
         setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
 
         categorie.setItems(Category.values());
-        statut.setItems(Status.values());
 
         capaciteMax.setMin(1);
         capaciteMax.setStep(1);
@@ -78,8 +76,8 @@ public class EventForm extends VerticalLayout {
                 lieu,
                 ville,
                 capaciteMax,
-                prixUnitaire,
-                statut
+                prixUnitaire
+
         );
 
         binder.bindInstanceFields(this);
@@ -88,32 +86,72 @@ public class EventForm extends VerticalLayout {
 
 
         add(
-                new H1("Create Event"),
+                new H1("Manage Event"),
                 formLayout,
                 createButtonLayout()
         );
     }
     public void setEvent(Event event) {
         this.event = event;
-        binder.setBean(event);  // This will now work correctly
+        binder.setBean(event);
 
-        // Update delete button visibility
-        if (delete != null) {
-            delete.setVisible(event != null && event.getId() != null);
+        // Recreate button layout with correct buttons
+        Component oldButtons = getChildren()
+                .filter(component -> component instanceof HorizontalLayout)
+                .findFirst()
+                .orElse(null);
+
+        if (oldButtons != null) {
+            replace(oldButtons, createButtonLayout());
         }
     }
 
     private Component createButtonLayout() {
-        // Style the buttons
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
-        save.addClickShortcut(Key.ENTER);
+        Button saveAsDraft = new Button("Save as Draft");
+        Button publish = new Button("Publish");
+        Button setToDraft = new Button("Set back to Draft");
+
+        saveAsDraft.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+        publish.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
+        setToDraft.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
+
         cancel.addClickShortcut(Key.ESCAPE);
 
+        // Save button (for modifications to existing events - keeps current status)
         save.addClickListener(e -> {
             if (binder.validate().isOk()) {
+                // Don't change the status, just save modifications
                 fireEvent(new SaveEvent(this, binder.getBean()));
+            }
+        });
+
+        // Save as draft button (for new events only)
+        saveAsDraft.addClickListener(e -> {
+            if (binder.validate().isOk()) {
+                Event evt = binder.getBean();
+                evt.setStatut(Status.BROUILLON);
+                fireEvent(new SaveEvent(this, evt));
+            }
+        });
+
+        // Publish button (changes status to PUBLIE)
+        publish.addClickListener(e -> {
+            if (binder.validate().isOk()) {
+                Event evt = binder.getBean();
+                evt.setStatut(Status.PUBLIE);
+                fireEvent(new SaveEvent(this, evt));
+            }
+        });
+
+        // Set to draft button (changes status back to BROUILLON)
+        setToDraft.addClickListener(e -> {
+            if (binder.validate().isOk()) {
+                Event evt = binder.getBean();
+                evt.setStatut(Status.BROUILLON);
+                fireEvent(new SaveEvent(this, evt));
             }
         });
 
@@ -125,14 +163,28 @@ public class EventForm extends VerticalLayout {
 
         cancel.addClickListener(e -> fireEvent(new CloseEvent(this)));
 
-        // Show delete only when editing existing event
-        delete.setVisible(event != null && event.getId() != null);
+        // Determine which buttons to show
+        HorizontalLayout buttonLayout = new HorizontalLayout();
 
-        // Return only save, delete, and cancel (remove "add" button)
-        return new HorizontalLayout(save, delete, cancel);
+        if (event == null || event.getId() == null) {
+            // NEW EVENT: Show only "Save as Draft" and "Publish"
+            buttonLayout.add(saveAsDraft, publish, cancel);
+        } else {
+            // EXISTING EVENT: Always show "Save" for modifications + status-specific buttons
+            if (event.getStatut() == Status.BROUILLON) {
+                // Draft event: "Save" (keep as draft), "Publish", "Delete", "Cancel"
+                buttonLayout.add(save, publish, delete, cancel);
+            } else if (event.getStatut() == Status.PUBLIE) {
+                // Published event: "Save" (keep published), "Set to Draft", "Delete", "Cancel"
+                buttonLayout.add(save, setToDraft, delete, cancel);
+            } else {
+                // Other statuses (ANNULE, TERMINE): "Save" (keep status), "Delete", "Cancel"
+                buttonLayout.add(save, delete, cancel);
+            }
+        }
+
+        return buttonLayout;
     }
-
-
 
 
 

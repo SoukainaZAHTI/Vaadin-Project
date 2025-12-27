@@ -70,5 +70,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public List<User> findByRole(Role role) {
+        return userRepository.findByRole(role);
+    }
 
+    public List<User> findAll() {
+        return userRepository.findAll();
+    }
 }
