@@ -25,12 +25,9 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.springframework.transaction.annotation.Transactional;
 
 @Route(value = "profile", layout = MainLayout.class)
 @PageTitle("Profile")
-@Transactional // Add this
-
 public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
 
     private final UserService userService;
@@ -54,6 +51,7 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
 
     private BeanValidationBinder<User> binder = new BeanValidationBinder<>(User.class);
     private User currentUser;
+    private UserService.UserProfileData profileData; // ADD THIS LINE
 
     public ProfileView(UserService userService, SessionService sessionService) {
         this.userService = userService;
@@ -70,6 +68,10 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
         if (currentUser == null) {
             return;
         }
+
+        // CHANGE THIS: Load profile data with statistics
+        profileData = userService.getUserProfileData(currentUser.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Create main container
         VerticalLayout container = new VerticalLayout();
@@ -122,6 +124,7 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
         return header;
     }
 
+    // REPLACE THIS ENTIRE METHOD
     private VerticalLayout createStatisticsSection() {
         VerticalLayout section = new VerticalLayout();
         section.setPadding(true);
@@ -163,9 +166,9 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
                 createStatCard("📊 Status", accountStatusSpan)
         );
 
-        // Additional stats based on role
+        // Additional stats based on role - USE PRELOADED DATA
         if (currentUser.isOrganizer()) {
-            totalEventsSpan.setText(String.valueOf(currentUser.getEvenementsOrganises().size()));
+            totalEventsSpan.setText(String.valueOf(profileData.getOrganizedEventsCount()));
             totalEventsSpan.getStyle()
                     .set("font-size", "24px")
                     .set("font-weight", "bold")
@@ -174,7 +177,7 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
         }
 
         if (currentUser.isClient()) {
-            totalReservationsSpan.setText(String.valueOf(currentUser.getReservations().size()));
+            totalReservationsSpan.setText(String.valueOf(profileData.getReservationsCount()));
             totalReservationsSpan.getStyle()
                     .set("font-size", "24px")
                     .set("font-weight", "bold")

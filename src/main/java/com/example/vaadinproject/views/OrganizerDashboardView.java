@@ -17,12 +17,15 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.RolesAllowed;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Route(value = "organizer", layout = MainLayout.class)
 @PageTitle("Organizer Dashboard")
+@RolesAllowed("ORGANIZER")
+
 public class OrganizerDashboardView extends VerticalLayout implements BeforeEnterObserver {
 
     private final EventService eventService;

@@ -1,5 +1,6 @@
 package com.example.vaadinproject.views;
 
+import com.example.vaadinproject.components.PasswordStrengthField; // ADD THIS IMPORT
 import com.example.vaadinproject.entities.Role;
 import com.example.vaadinproject.entities.User;
 import com.example.vaadinproject.services.SessionService;
@@ -7,14 +8,11 @@ import com.example.vaadinproject.services.UserService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -32,22 +30,21 @@ import com.vaadin.flow.server.auth.AnonymousAllowed;
 public class RegisterView extends HorizontalLayout {
 
     private final UserService userService;
+    private final SessionService sessionService;
 
     TextField nom = new TextField("First Name");
     TextField prenom = new TextField("Last Name");
-
     EmailField email = new EmailField("Email");
-    PasswordField password = new PasswordField("Password");
+
+    // REPLACE: PasswordField password = new PasswordField("Password");
+    // WITH:
+    PasswordStrengthField password = new PasswordStrengthField("Password");
+
+    PasswordField confirmPassword = new PasswordField("Confirm Password");
     TextField telephone = new TextField("Phone Number");
-
     Button register = new Button("Sign Up");
-    private final SessionService sessionService; // ADD THIS
-
-
-
 
     BeanValidationBinder<User> binder = new BeanValidationBinder<>(User.class);
-
 
     public RegisterView(UserService userService, SessionService sessionService) {
         this.userService = userService;
@@ -59,8 +56,13 @@ public class RegisterView extends HorizontalLayout {
         setJustifyContentMode(JustifyContentMode.CENTER);
         setPadding(true);
         setSpacing(true);
-        // Configure binder
-        binder.bindInstanceFields(this);
+
+        // Configure binder - BIND TO THE UNDERLYING PASSWORD FIELD
+        binder.forField(nom).bind(User::getNom, User::setNom);
+        binder.forField(prenom).bind(User::getPrenom, User::setPrenom);
+        binder.forField(email).bind(User::getEmail, User::setEmail);
+        binder.forField(password.getPasswordField()).bind(User::getPassword, User::setPassword);
+        binder.forField(telephone).bind(User::getTelephone, User::setTelephone);
 
         // Left side - Branding
         VerticalLayout leftSide = new VerticalLayout();
@@ -69,12 +71,12 @@ public class RegisterView extends HorizontalLayout {
         leftSide.setWidth("50%");
 
         Image appName = new Image("https://github.com/SoukainaZAHTI/Resources/blob/main/logo.png?raw=true", "EventHub Logo");
-        appName.setHeight("30%"); // Reduced height for better header proportions
+        appName.setHeight("30%");
         appName.getStyle()
                 .set("margin", "0")
                 .set("cursor", "pointer")
-                .set("object-fit", "contain") // Keep aspect ratio
-                .set("max-width", "350%"); // Limit maximum width
+                .set("object-fit", "contain")
+                .set("max-width", "350%");
 
         appName.addClickListener(e -> UI.getCurrent().navigate("/"));
 
@@ -88,7 +90,6 @@ public class RegisterView extends HorizontalLayout {
         Image illustration = new Image("https://github.com/SoukainaZAHTI/Resources/blob/main/illustrationEventHUB.png?raw=true", "Events illustration");
         illustration.setWidth("600px");
         illustration.setHeight("600px");
-        //illustration.getStyle().set("margin-top", "10px");
 
         leftSide.add(appName, tagline, illustration);
 
@@ -124,19 +125,19 @@ public class RegisterView extends HorizontalLayout {
         email.setRequired(true);
         email.setErrorMessage("Please enter a valid email");
 
+        // Password is already configured by PasswordStrengthField
+        // Just set it to full width
         password.setWidthFull();
-        password.setRequired(true);
-        password.setMinLength(8);
-        password.setErrorMessage("Password must be at least 8 characters");
+
+        confirmPassword.setWidthFull();
+        confirmPassword.setRequired(true);
+        confirmPassword.setErrorMessage("Passwords must match");
 
         telephone.setWidthFull();
         telephone.setPlaceholder("+212 612-345-678");
         telephone.setPattern("^\\+?[0-9]{10,15}$");
         telephone.setHelperText("Enter a valid phone number (10-15 digits)");
         telephone.setErrorMessage("Invalid phone number format");
-
-
-
 
         register.setWidthFull();
         register.addClickShortcut(Key.ENTER);
@@ -150,18 +151,30 @@ public class RegisterView extends HorizontalLayout {
                 .set("border-radius", "6px")
                 .set("cursor", "pointer")
                 .set("margin-top", "10px");
-        register.addClickShortcut(Key.ENTER);
         register.addClickListener(event -> registerUser());
 
-
-
-        card.add(subtitle, nom, prenom, email, password, telephone, register);
+        card.add(subtitle, nom, prenom, email, password, confirmPassword, telephone, register);
         rightSide.add(card);
 
         add(leftSide, rightSide);
     }
+
     private void registerUser() {
         try {
+            // Validate passwords match
+            if (!password.getValue().equals(confirmPassword.getValue())) {
+                Notification.show("Passwords do not match!")
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return;
+            }
+
+            // Validate password length
+            if (password.getValue().length() < 8) {
+                Notification.show("Password must be at least 8 characters")
+                        .addThemeVariants(NotificationVariant.LUMO_ERROR);
+                return;
+            }
+
             // Create new user object
             User user = new User();
 
@@ -186,7 +199,7 @@ public class RegisterView extends HorizontalLayout {
             Notification.show("Registration successful! Welcome to EventHub!")
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
-            clearForm(); // Clear the form before navigation
+            clearForm();
 
             // Redirect based on role
             UI.getCurrent().navigate("client/dashboard");
@@ -197,29 +210,13 @@ public class RegisterView extends HorizontalLayout {
         }
     }
 
-//    private void redirectBasedOnRole(User user) {
-//        switch (user.getRole()) {
-//            case ADMIN:
-//                UI.getCurrent().navigate("admin");
-//                break;
-//            case ORGANIZER:
-//                UI.getCurrent().navigate("organizer");
-//                break;
-//            case CLIENT:
-//                UI.getCurrent().navigate("client/dashboard");
-//                break;
-//            default:
-//                UI.getCurrent().navigate("login");
-//                break;
-//        }
-//    }
-
     private void clearForm() {
         binder.readBean(null);
         nom.clear();
         prenom.clear();
         email.clear();
         password.clear();
+        confirmPassword.clear();
         telephone.clear();
     }
 }
