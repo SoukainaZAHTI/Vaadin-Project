@@ -10,7 +10,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-@Route("organizer")
+@Route(value = "organizer", layout = MainLayout.class)
 @PageTitle("OrganizerDashboard")
 public class OrganizerDashboardView extends VerticalLayout implements BeforeEnterObserver {
 

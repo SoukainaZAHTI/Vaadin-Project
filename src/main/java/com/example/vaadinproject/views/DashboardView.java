@@ -9,7 +9,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.component.UI;
 
-@Route("client/dashboard")
+@Route(value = "client/dashboard", layout = MainLayout.class)
 public class DashboardView extends VerticalLayout implements BeforeEnterObserver {
 
     private final SessionService sessionService;

@@ -2,7 +2,6 @@ package com.example.vaadinproject.views;
 
 import com.example.vaadinproject.entities.Event;
 import com.example.vaadinproject.entities.User;
-import com.example.vaadinproject.repositories.EventRepository;
 import com.example.vaadinproject.services.EventService;
 import com.example.vaadinproject.services.SessionService;
 import com.vaadin.flow.component.Component;
@@ -21,9 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collections;
 
-@Route("organizer/events")
+@Route(value = "events", layout = MainLayout.class)  // Add layout parameter
 @PageTitle("Events")
-@AnonymousAllowed
 public class EventListView extends VerticalLayout implements BeforeEnterObserver {
 
     private final SessionService sessionService;

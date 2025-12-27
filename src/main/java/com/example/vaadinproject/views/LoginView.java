@@ -61,7 +61,7 @@ public class LoginView extends VerticalLayout {
         loginButton.setWidthFull();
         loginButton.addClickListener(e -> handleLogin());
         loginButton.getStyle()
-                .set("background", "#A14C3A")
+                .set("background", "#9C4C36")
                 .set("color", "white")
                 .set("font-weight", "bold")
                 .set("font-size", "16px")
