@@ -1,6 +1,6 @@
 package com.example.vaadinproject.services;
 
-import com.example.vaadinproject.entities.User;
+import com.example.vaadinproject.entities.*;
 import com.example.vaadinproject.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,7 @@ public class UserService {
     }
 
     public List<User> findAllUsers(String filterText) {
-        if(filterText == null || filterText.isEmpty()) {
+        if (filterText == null || filterText.isEmpty()) {
             return userRepository.findAll();
         } else {
             return userRepository.search(filterText);
@@ -47,4 +47,28 @@ public class UserService {
         }
         return Optional.empty();
     }
+
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
+
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    public User changePassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setPassword(newPassword);
+        return userRepository.save(user);
+    }
+
+    public User deactivateAccount(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setActif(false);
+        return userRepository.save(user);
+    }
+
+
 }

@@ -38,8 +38,7 @@ public class RegisterView extends HorizontalLayout {
 
     EmailField email = new EmailField("Email");
     PasswordField password = new PasswordField("Password");
-    TextField phoneNumber = new TextField("Phone Number");
-    ComboBox<Role> role = new ComboBox<>("Role");
+    TextField telephone = new TextField("Phone Number");
 
     Button register = new Button("Sign Up");
     private final SessionService sessionService; // ADD THIS
@@ -77,7 +76,7 @@ public class RegisterView extends HorizontalLayout {
                 .set("object-fit", "contain") // Keep aspect ratio
                 .set("max-width", "350%"); // Limit maximum width
 
-        appName.addClickListener(e -> UI.getCurrent().navigate("home"));
+        appName.addClickListener(e -> UI.getCurrent().navigate("/"));
 
         Paragraph tagline = new Paragraph("Discover and manage amazing events");
         tagline.getStyle()
@@ -130,17 +129,14 @@ public class RegisterView extends HorizontalLayout {
         password.setMinLength(8);
         password.setErrorMessage("Password must be at least 8 characters");
 
-        phoneNumber.setWidthFull();
-        phoneNumber.setPlaceholder("+212 612-345-678");
-        phoneNumber.setPattern("^\\+?[0-9]{10,15}$");
-        phoneNumber.setHelperText("Enter a valid phone number (10-15 digits)");
-        phoneNumber.setErrorMessage("Invalid phone number format");
+        telephone.setWidthFull();
+        telephone.setPlaceholder("+212 612-345-678");
+        telephone.setPattern("^\\+?[0-9]{10,15}$");
+        telephone.setHelperText("Enter a valid phone number (10-15 digits)");
+        telephone.setErrorMessage("Invalid phone number format");
 
-        role.setWidthFull();
-        role.setItems(Role.values());
-        role.setItemLabelGenerator(Role::getLabel);
-        role.setAllowCustomValue(false);
-        role.setRequired(true);
+
+
 
         register.setWidthFull();
         register.addClickShortcut(Key.ENTER);
@@ -159,7 +155,7 @@ public class RegisterView extends HorizontalLayout {
 
 
 
-        card.add(subtitle, nom, prenom, email, password, phoneNumber, role, register);
+        card.add(subtitle, nom, prenom, email, password, telephone, register);
         rightSide.add(card);
 
         add(leftSide, rightSide);
@@ -171,6 +167,7 @@ public class RegisterView extends HorizontalLayout {
 
             // Write form values to the user object
             binder.writeBean(user);
+            user.setRole(Role.CLIENT);
 
             // Check if email already exists
             if (userService.emailExists(user.getEmail())) {
@@ -189,8 +186,10 @@ public class RegisterView extends HorizontalLayout {
             Notification.show("Registration successful! Welcome to EventHub!")
                     .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
 
+            clearForm(); // Clear the form before navigation
+
             // Redirect based on role
-            redirectBasedOnRole(savedUser);
+            UI.getCurrent().navigate("client/dashboard");
 
         } catch (ValidationException e) {
             Notification.show("Please fill all required fields correctly")
@@ -198,22 +197,22 @@ public class RegisterView extends HorizontalLayout {
         }
     }
 
-    private void redirectBasedOnRole(User user) {
-        switch (user.getRole()) {
-            case ADMIN:
-                UI.getCurrent().navigate("admin");
-                break;
-            case ORGANIZER:
-                UI.getCurrent().navigate("organizer");
-                break;
-            case CLIENT:
-                UI.getCurrent().navigate("client/dashboard");
-                break;
-            default:
-                UI.getCurrent().navigate("login");
-                break;
-        }
-    }
+//    private void redirectBasedOnRole(User user) {
+//        switch (user.getRole()) {
+//            case ADMIN:
+//                UI.getCurrent().navigate("admin");
+//                break;
+//            case ORGANIZER:
+//                UI.getCurrent().navigate("organizer");
+//                break;
+//            case CLIENT:
+//                UI.getCurrent().navigate("client/dashboard");
+//                break;
+//            default:
+//                UI.getCurrent().navigate("login");
+//                break;
+//        }
+//    }
 
     private void clearForm() {
         binder.readBean(null);
@@ -221,7 +220,6 @@ public class RegisterView extends HorizontalLayout {
         prenom.clear();
         email.clear();
         password.clear();
-        role.clear();
-        phoneNumber.clear();
+        telephone.clear();
     }
 }

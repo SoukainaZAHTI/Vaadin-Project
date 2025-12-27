@@ -9,6 +9,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -34,7 +35,7 @@ public class LoginView extends VerticalLayout {
     public LoginView(UserService userService, SessionService sessionService) {
 
         VerticalLayout loginCard = new VerticalLayout();
-        loginCard.setWidth("600px");
+        loginCard.setWidth("400px");
         loginCard.getStyle()
                 .set("background", "white")
                 .set("padding", "30px")
@@ -71,12 +72,26 @@ public class LoginView extends VerticalLayout {
                 .set("cursor", "pointer")
                 .set("margin-top", "10px");
         loginButton.addClickShortcut(Key.ENTER);
+
+        Image appName = new Image("https://private-user-images.githubusercontent.com/214033788/530433296-10326aaa-7231-4cb6-b43e-8e0ae2f58e4a.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjY3OTMxMDAsIm5iZiI6MTc2Njc5MjgwMCwicGF0aCI6Ii8yMTQwMzM3ODgvNTMwNDMzMjk2LTEwMzI2YWFhLTcyMzEtNGNiNi1iNDNlLThlMGFlMmY1OGU0YS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUxMjI2JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MTIyNlQyMzQ2NDBaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0yODRiODA0ZDhjMzcwNWUwNTZlNDMxMWE0NWEwYTFkZjczZjliZDQyYjJkMzYzNDVmM2MxZTFiYjVhMjI3MzdlJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.HlfezVVFRWDIfF5z1zH_id0rqzVjrRawqGXCyJdZdkw", "EventHub Logo");
+        appName.setHeight("200px"); // Reduced height for better header proportions
+        appName.getStyle()
+                .set("margin", "10px")
+                .set("cursor", "pointer")
+                .set("object-fit", "contain") // Keep aspect ratio
+                .set("max-width", "300px"); // Limit maximum width
+
+        appName.addClickListener(e -> UI.getCurrent().navigate("/"));
+
+
+
+
         // Registration link
         Anchor registerLink = new Anchor("/register", "Don't have an account? Register Now!");
         loginCard.add(email, password  , loginButton, registerLink);
 
         add(
-                new H1("Welcome Back To EventHub!"),
+                appName,
                 loginCard
         );
     }

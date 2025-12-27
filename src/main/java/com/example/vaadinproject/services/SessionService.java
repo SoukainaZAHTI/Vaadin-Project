@@ -3,6 +3,7 @@ package com.example.vaadinproject.services;
 import com.example.vaadinproject.entities.User;
 import com.vaadin.flow.server.VaadinSession;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SessionService {
@@ -12,6 +13,7 @@ public class SessionService {
     public void setCurrentUser(User user) {
         VaadinSession.getCurrent().setAttribute(USER_SESSION_KEY, user);
     }
+    @Transactional(readOnly = true)  // ← Opens a database session
 
     public User getCurrentUser() {
         return (User) VaadinSession.getCurrent().getAttribute(USER_SESSION_KEY);

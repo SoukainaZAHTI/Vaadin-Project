@@ -15,27 +15,20 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.auth.AnonymousAllowed;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
-
-@Route(value = "events", layout = MainLayout.class)  // Add layout parameter
+@Route(value = "events", layout = MainLayout.class)
 @PageTitle("Events")
 public class EventListView extends VerticalLayout implements BeforeEnterObserver {
 
     private final SessionService sessionService;
-
     private final Grid<Event> grid = new Grid<>(Event.class, false);
     private final TextField filterText = new TextField();
     EventForm form;
     EventService service;
 
-    @Autowired
     public EventListView(EventService service, SessionService sessionService) {
         this.service = service;
         this.sessionService = sessionService;
-
 
         addClassName("event-list-view");
         setSizeFull();
@@ -48,11 +41,30 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
         updateList();
     }
 
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        // Allow both organizers and admins
+        if (!sessionService.isLoggedIn() ||
+                (!sessionService.isOrganizer() && !sessionService.isAdmin())) {
+            event.rerouteTo("login");
+        }
+    }
+
     private void updateList() {
-        // Check if user is logged in and is an organizer
-        if (sessionService.isLoggedIn() && sessionService.isOrganizer()) {
-            // Show only current organizer's events
-            Long organizerId = sessionService.getCurrentUser().getId();
+        User currentUser = sessionService.getCurrentUser();
+
+        if (currentUser == null) {
+            grid.setItems();
+            return;
+        }
+
+        // Admins can see all events
+        if (currentUser.isAdmin()) {
+            grid.setItems(service.findAllEvents(filterText.getValue()));
+        }
+        // Organizers can only see their own events
+        else if (currentUser.isOrganizer()) {
+            Long organizerId = currentUser.getId();
 
             if (filterText.getValue() == null || filterText.getValue().isEmpty()) {
                 grid.setItems(service.findEventsByOrganizer(organizerId));
@@ -65,43 +77,63 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
                                 .toList()
                 );
             }
-        } else {
-            // For non-organizers or not logged in, show all events
-            grid.setItems(service.findAllEvents(filterText.getValue()));
         }
     }
 
     private void configureForm() {
         form = new EventForm(service.findAllEvents());
         form.setWidth("25em");
-        form.setVisible(false); // Hide by default
+        form.setVisible(false);
 
         form.addListener(EventForm.SaveEvent.class, this::saveEvent);
         form.addListener(EventForm.DeleteEvent.class, this::deleteEvent);
         form.addListener(EventForm.CloseEvent.class, e -> closeEditor());
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        if (!sessionService.isLoggedIn() || !sessionService.isOrganizer()) {
-            event.rerouteTo("login");
-        }
-    }
+
 
     private void saveEvent(EventForm.SaveEvent event) {
         Event evt = event.getEvent();
+        User currentUser = sessionService.getCurrentUser();
 
-        // Auto-assign current organizer to new events
-        if (evt.getId() == null && sessionService.isLoggedIn()) {
-            evt.setOrganisateur(sessionService.getCurrentUser());
+        // Auto-assign current organizer to new events (for organizers only)
+        if (evt.getId() == null && currentUser.isOrganizer()) {
+            evt.setOrganisateur(currentUser);
+        }
+
+        // Initialize placesDisponibles for new events
+        if (evt.getId() == null && evt.getPlacesDisponibles() == null) {
+            evt.setPlacesDisponibles(evt.getCapaciteMax());
+        }
+
+        // Validation: Organizers can only edit their own events
+        if (currentUser.isOrganizer() && evt.getId() != null) {
+            if (!evt.getOrganisateur().getId().equals(currentUser.getId())) {
+                form.setVisible(false);
+                return;
+            }
         }
 
         service.saveEvent(evt);
         updateList();
         closeEditor();
     }
+
     private void deleteEvent(EventForm.DeleteEvent event) {
-        service.deleteEvent(event.getEvent());
+        Event evt = event.getEvent();
+        User currentUser = sessionService.getCurrentUser();
+
+        // Validation: Organizers can only delete their own events
+        if (currentUser.isOrganizer()) {
+            if (!evt.getOrganisateur().getId().equals(currentUser.getId())) {
+                closeEditor();
+                return; // Prevent deleting other organizer's events
+            }
+        }
+
+        // Admins can delete any event
+
+        service.deleteEvent(evt);
         updateList();
         closeEditor();
     }
@@ -112,17 +144,27 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
         removeClassName("editing");
     }
 
-
     private void editEvent(Event event) {
         if (event == null) {
             closeEditor();
         } else {
+            User currentUser = sessionService.getCurrentUser();
+
+            // Check permissions before allowing edit
+            if (currentUser.isOrganizer()) {
+                // Organizers can only edit their own events
+                if (!event.getOrganisateur().getId().equals(currentUser.getId())) {
+                    closeEditor();
+                    return;
+                }
+            }
+            // Admins can edit any event
+
             form.setEvent(event);
             form.setVisible(true);
             addClassName("editing");
         }
     }
-
 
     private Component getContent() {
         HorizontalLayout content = new HorizontalLayout(grid, form);
@@ -185,7 +227,6 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
         });
     }
 
-
     private HorizontalLayout getToolbar() {
         filterText.setPlaceholder("Filter by title...");
         filterText.setClearButtonVisible(true);
@@ -195,17 +236,28 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
         Button addEventButton = new Button("Add Event");
         addEventButton.addClickListener(e -> addEvent());
 
+        // Only show "Add Event" button for organizers, not admins
+        if (sessionService.getCurrentUser().isOrganizer()) {
+            addEventButton.setVisible(true);
+        } else {
+            addEventButton.setVisible(false);
+        }
+
         HorizontalLayout toolbar = new HorizontalLayout(filterText, addEventButton);
         toolbar.addClassName("toolbar");
         return toolbar;
     }
+
     private void addEvent() {
+        // Only organizers can add new events
+        if (!sessionService.getCurrentUser().isOrganizer()) {
+            return;
+        }
+
         grid.asSingleSelect().clear();
         Event newEvent = new Event();
         form.setEvent(newEvent);
         form.setVisible(true);
         addClassName("editing");
     }
-
-
 }

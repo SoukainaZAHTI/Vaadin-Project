@@ -11,6 +11,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -43,6 +44,8 @@ public class HomeView extends VerticalLayout {
     public HomeView(EventService eventService, SessionService sessionService) {
         this.eventService = eventService;
         this.sessionService = sessionService;
+        System.out.println("HomeView created with sessionService: " + (sessionService != null ? "OK" : "NULL"));
+
 
         // Remove default spacing and padding for custom layout
         setSizeFull();
@@ -310,85 +313,12 @@ public class HomeView extends VerticalLayout {
     }
 
 
+
     private void showEventDetails(Event event) {
-        // Create a dialog to show full event details
-        var dialog = new com.vaadin.flow.component.dialog.Dialog();
-        dialog.setWidth("600px");
 
-        VerticalLayout dialogContent = new VerticalLayout();
-        dialogContent.setPadding(true);
-        dialogContent.setSpacing(true);
-
-        H2 title = new H2(event.getTitre());
-        title.getStyle().set("margin-top", "0").set("color", "#1976d2");
-
-        Paragraph description = new Paragraph(event.getDescription());
-        description.getStyle().set("color", "#555");
-
-        HorizontalLayout info = new HorizontalLayout();
-        info.setWidthFull();
-
-        VerticalLayout leftInfo = new VerticalLayout();
-        leftInfo.setPadding(false);
-        leftInfo.add(
-                new Paragraph("📂 Category: " + event.getCategorie()),
-                new Paragraph("📅 Start: " + event.getDateDebut()),
-                new Paragraph("📅 End: " + event.getDateFin()),
-                new Paragraph("📍 Location: " + event.getLieu() + ", " + event.getVille())
-        );
-
-        VerticalLayout rightInfo = new VerticalLayout();
-        rightInfo.setPadding(false);
-        rightInfo.add(
-                new Paragraph("💰 Price: " + event.getPrixUnitaire() + " MAD"),
-                new Paragraph("👥 Capacity: " + event.getCapaciteMax()),
-                new Paragraph("✅ Available: " + event.getPlacesDisponibles()),
-                new Paragraph("📊 Status: " + event.getStatut())
-        );
-
-        info.add(leftInfo, rightInfo);
-
-        HorizontalLayout buttons = new HorizontalLayout();
-        buttons.setWidthFull();
-        buttons.setJustifyContentMode(JustifyContentMode.END);
-
-        if (sessionService.isLoggedIn() && sessionService.isClient()) {
-            Button bookButton = new Button("Book Now");
-            bookButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_SUCCESS);
-            bookButton.addClickListener(e -> {
-                dialog.close();
-                // TODO: Navigate to booking page
-                com.vaadin.flow.component.notification.Notification.show(
-                        "Booking feature coming soon!",
-                        3000,
-                        com.vaadin.flow.component.notification.Notification.Position.MIDDLE
-                );
-            });
-            buttons.add(bookButton);
-        } else if (!sessionService.isLoggedIn()) {
-            Paragraph loginMessage = new Paragraph("Please login to book this event");
-            loginMessage.getStyle().set("color", "#ff9800").set("font-weight", "bold");
-
-            Button loginButton = new Button("Login");
-            loginButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            loginButton.addClickListener(e -> {
-                dialog.close();
-                UI.getCurrent().navigate("login");
-            });
-
-            buttons.add(loginMessage, loginButton);
-        }
-
-        Button closeButton = new Button("Close");
-        closeButton.addClickListener(e -> dialog.close());
-        buttons.add(closeButton);
-
-        dialogContent.add(title, description, info, buttons);
-        dialog.add(dialogContent);
+        EventDetailView dialog = new EventDetailView(event, sessionService);
         dialog.open();
     }
-
-
 
 
 

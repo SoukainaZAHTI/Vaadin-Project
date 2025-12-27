@@ -1,5 +1,6 @@
 package com.example.vaadinproject.repositories;
 
+import com.example.vaadinproject.entities.Event;
 import org.springframework.stereotype.Repository;
 
 import com.example.vaadinproject.entities.User;
@@ -20,6 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "where lower(c.prenom) like lower(concat('%', :searchTerm, '%')) " +
             "or lower(c.nom) like lower(concat('%', :searchTerm, '%'))")
      List<User> search(@Param("searchTerm") String searchTerm);
+
     Optional<User> findByEmail(String email);
 
 }

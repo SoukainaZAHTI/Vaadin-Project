@@ -10,6 +10,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -36,7 +37,7 @@ public class MainLayout extends AppLayout {
                 .set("object-fit", "contain") // Keep aspect ratio
                 .set("max-width", "20%"); // Limit maximum width
 
-        logo.addClickListener(e -> UI.getCurrent().navigate("home"));
+        logo.addClickListener(e -> UI.getCurrent().navigate("/"));
 
         // User info or login/register buttons
         HorizontalLayout headerRight = new HorizontalLayout();
@@ -45,9 +46,10 @@ public class MainLayout extends AppLayout {
         headerRight.getStyle().set("flex-shrink", "0"); // Prevent buttons from shrinking
 
         if (sessionService.isLoggedIn()) {
-            Span userName = new Span("👤 " + sessionService.getCurrentUser().getNomComplet());
-            userName.getStyle().set("color", "white");
-
+//            Span userName = new Span("👤 " + sessionService.getCurrentUser().getNomComplet());
+//            userName.getStyle().set("color", "white");
+            Button profileButton = new Button("My Profile", new Icon(VaadinIcon.USER));
+            profileButton.addClickListener(e -> UI.getCurrent().navigate("profile"));
             Button logoutBtn = new Button("Logout", VaadinIcon.SIGN_OUT.create());
             logoutBtn.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
             logoutBtn.addClickListener(e -> {
@@ -56,7 +58,7 @@ public class MainLayout extends AppLayout {
                 UI.getCurrent().getPage().reload();
             });
 
-            headerRight.add(userName, logoutBtn);
+            headerRight.add(profileButton, logoutBtn);
         } else {
             Button loginBtn = new Button("Login", VaadinIcon.SIGN_IN.create());
             loginBtn.addThemeVariants(ButtonVariant.LUMO_CONTRAST);

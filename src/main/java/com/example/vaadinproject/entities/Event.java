@@ -57,6 +57,7 @@ public class Event {
     @Column(length = 500)
     private String imageUrl;
 
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Status statut = Status.BROUILLON;
@@ -73,6 +74,13 @@ public class Event {
     @OneToMany(mappedBy = "evenement", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> reservations = new ArrayList<>();
 
+    @Column(name = "places_disponibles")
+    private Integer placesDisponibles;
+
+    // Update this whenever a reservation is made/cancelled
+    public void updatePlacesDisponibles(Integer reservedSeats) {
+        this.placesDisponibles = this.capaciteMax - reservedSeats;
+    }
     public Event() {}
 
     public Event(String titre, String description, Category categorie, LocalDateTime dateDebut,
@@ -153,10 +161,13 @@ public class Event {
                 .sum();
     }
 
-    public int getPlacesDisponibles() {
-        return capaciteMax - getPlacesReservees();
-    }
 
+public Integer getPlacesDisponibles() {
+    return placesDisponibles;
+}
+    public void setPlacesDisponibles(Integer placesDisponibles) {
+        this.placesDisponibles = placesDisponibles;
+    }
     public boolean isDisponible() {
         return statut == Status.PUBLIE &&
                 dateDebut.isAfter(LocalDateTime.now()) &&
