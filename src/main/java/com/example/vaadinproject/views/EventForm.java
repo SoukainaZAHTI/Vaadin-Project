@@ -86,7 +86,6 @@ public class EventForm extends VerticalLayout {
 
 
         add(
-                new H1("Manage Event"),
                 formLayout,
                 createButtonLayout()
         );

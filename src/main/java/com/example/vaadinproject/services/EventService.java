@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -85,9 +86,23 @@ public class EventService {
         return eventRepository.findByOrganisateurId(organizerId);
     }
     public List<Event> searchPublicEvents(String keyword, Category category, String city, LocalDate date) {
-        // Simple implementation - just return all published events
-        return eventRepository.findAll().stream()
-                .filter(event -> event.getStatut() == Status.PUBLIE)
+        System.out.println("EventService.searchPublicEvents called"); // Debug
+        System.out.println("Params: keyword=" + keyword + ", category=" + category +
+                ", city=" + city + ", date=" + date); // Debug
+
+        List<Event> allEvents = eventRepository.findByStatut(Status.PUBLIE);
+        System.out.println("Total published events: " + allEvents.size()); // Debug
+
+        return allEvents.stream()
+                .filter(event -> keyword == null || keyword.isEmpty() ||
+                        event.getTitre().toLowerCase().contains(keyword.toLowerCase()) ||
+                        (event.getDescription() != null &&
+                                event.getDescription().toLowerCase().contains(keyword.toLowerCase())))
+                .filter(event -> category == null || event.getCategorie() == category)
+                .filter(event -> city == null || city.isEmpty() ||
+                        event.getVille().toLowerCase().contains(city.toLowerCase()))
+                .filter(event -> date == null ||
+                        event.getDateDebut().toLocalDate().equals(date))
                 .collect(Collectors.toList());
     }
     public List<Event> findByStatut(Status statut) {
@@ -96,6 +111,10 @@ public class EventService {
 
     public List<Event> findAll() {
         return eventRepository.findAll();
+    }
+    @Transactional(readOnly = true)
+    public Optional<Event> getEventById(Long id) {
+        return eventRepository.findById(id);
     }
 }
 
