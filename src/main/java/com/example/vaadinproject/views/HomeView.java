@@ -3,6 +3,7 @@ package com.example.vaadinproject.views;
 import com.example.vaadinproject.components.*;
 import com.example.vaadinproject.entities.Event;
 import com.example.vaadinproject.services.EventService;
+import com.example.vaadinproject.services.NavigationManager;
 import com.example.vaadinproject.services.SessionService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -20,13 +21,17 @@ public class HomeView extends VerticalLayout {
 
     private final EventService eventService;
     private final SessionService sessionService;
+    private final NavigationManager navigationManager;
 
     private SearchSection searchSection;
     private EventsSection eventsSection;
 
-    public HomeView(EventService eventService, SessionService sessionService) {
+    public HomeView(EventService eventService, SessionService sessionService,
+                    NavigationManager navigationManager) {
         this.eventService = eventService;
         this.sessionService = sessionService;
+        this.navigationManager = navigationManager;
+
 
         setSizeFull();
         setPadding(false);
@@ -53,7 +58,7 @@ public class HomeView extends VerticalLayout {
                 .set("cursor", "pointer")
                 .set("border", "none");
         discoverButton.addClickListener(e ->
-                UI.getCurrent().navigate(AllEventsView.class)
+                navigationManager.navigateToAllEvents()
         );
 
 // Wrap button in a centered container
@@ -106,6 +111,7 @@ public class HomeView extends VerticalLayout {
                 .filter(event -> event != null)
                 .collect(java.util.stream.Collectors.toList());
     }
+
     private void showEventDetails(Event event) {
         EventDetailView dialog = new EventDetailView(event, sessionService);
         dialog.open();

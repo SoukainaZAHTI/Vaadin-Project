@@ -1,31 +1,85 @@
 package com.example.vaadinproject.views;
 
+import com.example.vaadinproject.components.Breadcrumb;
+import com.example.vaadinproject.services.NavigationManager;
 import com.example.vaadinproject.services.SessionService;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinSession;
 
 public class MainLayout extends AppLayout {
 
     private final SessionService sessionService;
+    private final NavigationManager navigationManager;
+    private Breadcrumb breadcrumb;
 
-    public MainLayout(SessionService sessionService) {
+    public MainLayout(SessionService sessionService, NavigationManager navigationManager) {
         this.sessionService = sessionService;
+        this.navigationManager = navigationManager;
+
 
         createHeader();
         createDrawer();
+        setDrawerOpened(false);
+        createBreadcrumb();
+
+    }
+
+    private RouterLink createStyledLink(String text, Class<? extends Component> navigationTarget) {
+        RouterLink link = new RouterLink(text, navigationTarget);
+
+        // Basic styling
+        link.getStyle()
+                .set("color", "#333")
+                .set("font-size", "bold")
+                .set("text-decoration", "none")          // Remove underline
+                .set("padding", "10px 15px")             // Padding
+                .set("border-radius", "8px")             // Rounded corners
+                .set("display", "block")                 // Full width
+                .set("transition", "all 0.3s ease");     // Smooth transition
+
+        // Hover effect
+        link.getElement().addEventListener("mouseenter", e -> {
+            link.getStyle()
+                    .set("background-color", "#e3f2fd")  // Light blue background
+                    .set("color", "#1976d2");            // Blue text
+        });
+
+        link.getElement().addEventListener("mouseleave", e -> {
+            link.getStyle()
+                    .set("background-color", "transparent")
+                    .set("color", "#333");
+        });
+
+        return link;
+    }
+
+
+
+
+
+
+
+
+    private void createBreadcrumb() {
+        breadcrumb = new Breadcrumb();
+        breadcrumb.setWidthFull();
+        setContent(breadcrumb); // This will be replaced by actual content in views
+    }
+
+    public Breadcrumb getBreadcrumb() {
+        return breadcrumb;
     }
 
     private void createHeader() {
@@ -37,7 +91,7 @@ public class MainLayout extends AppLayout {
                 .set("object-fit", "contain") // Keep aspect ratio
                 .set("max-width", "20%"); // Limit maximum width
 
-        logo.addClickListener(e -> UI.getCurrent().navigate("/"));
+        logo.addClickListener(e -> navigationManager.navigateToHome());
 
         // User info or login/register buttons
         HorizontalLayout headerRight = new HorizontalLayout();
@@ -49,12 +103,13 @@ public class MainLayout extends AppLayout {
 //            Span userName = new Span("👤 " + sessionService.getCurrentUser().getNomComplet());
 //            userName.getStyle().set("color", "white");
             Button profileButton = new Button("My Profile", new Icon(VaadinIcon.USER));
-            profileButton.addClickListener(e -> UI.getCurrent().navigate("profile"));
+            profileButton.addClickListener(e -> navigationManager.navigateToProfile());
             Button logoutBtn = new Button("Logout", VaadinIcon.SIGN_OUT.create());
             logoutBtn.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
             logoutBtn.addClickListener(e -> {
                 sessionService.logout();
-                UI.getCurrent().getPage().setLocation("/login"); // Use setLocation for full page reload
+                VaadinSession.getCurrent().close();
+                navigationManager.logoutAndRedirect();
             });
 
             headerRight.add(profileButton, logoutBtn);
@@ -62,12 +117,12 @@ public class MainLayout extends AppLayout {
             Button loginBtn = new Button("Login", VaadinIcon.SIGN_IN.create());
             loginBtn.getStyle().set("color", "white")
                     .set("background-color", "#5E6E28");
-            loginBtn.addClickListener(e -> UI.getCurrent().navigate("login"));
+            loginBtn.addClickListener(e -> navigationManager.navigateToLogin());
 
             Button registerBtn = new Button("Register", VaadinIcon.USER.create());
             registerBtn.getStyle().set("color", "white")
                     .set("background-color", "#9C4C36");
-            registerBtn.addClickListener(e -> UI.getCurrent().navigate("register"));
+            registerBtn.addClickListener(e -> navigationManager.navigateToRegister());
 
             headerRight.add(loginBtn, registerBtn);
         }
@@ -104,23 +159,24 @@ public class MainLayout extends AppLayout {
         drawerContent.setSpacing(true);
 
         // Common menu items for everyone
-        RouterLink homeLink = new RouterLink("🏠 Home", HomeView.class);
+        RouterLink homeLink = createStyledLink("🏠 Home", HomeView.class);
+
         drawerContent.add(homeLink);
 
         // Role-based menu items
         if (sessionService.isLoggedIn()) {
             if (sessionService.isAdmin()) {
-                RouterLink dashboardLink = new RouterLink("📊 Admin Dashboard", AdminDashboardView.class);
-                RouterLink usersLink = new RouterLink("👥 Manage Users", UserListView.class);
-                RouterLink allEventsLink = new RouterLink("📅 All Events", EventListView.class);
+                RouterLink dashboardLink = createStyledLink("📊 Admin Dashboard", AdminDashboardView.class);
+                RouterLink usersLink = createStyledLink("👥 Manage Users", UserListView.class);
+                RouterLink allEventsLink = createStyledLink("📅 All Events", EventListView.class);
                 drawerContent.add(dashboardLink, usersLink, allEventsLink);
             } else if (sessionService.isOrganizer()) {
-                RouterLink dashboardLink = new RouterLink("📊 Dashboard", OrganizerDashboardView.class);
-                RouterLink myEventsLink = new RouterLink("📅 My Events", EventListView.class);
+                RouterLink dashboardLink = createStyledLink("📊 Dashboard", OrganizerDashboardView.class);
+                RouterLink myEventsLink = createStyledLink("📅 My Events", EventListView.class);
                 drawerContent.add(dashboardLink, myEventsLink);
             } else if (sessionService.isClient()) {
-                RouterLink dashboardLink = new RouterLink("📊 Dashboard", DashboardView.class);
-                RouterLink myBookingsLink = new RouterLink("🎫 My Bookings", HomeView.class); // TODO: Create BookingsView
+                RouterLink dashboardLink = createStyledLink("📊 Dashboard", DashboardView.class);
+                RouterLink myBookingsLink = createStyledLink("🎫 My Bookings", HomeView.class); // TODO: Create BookingsView
                 drawerContent.add(dashboardLink, myBookingsLink);
             }
         }
