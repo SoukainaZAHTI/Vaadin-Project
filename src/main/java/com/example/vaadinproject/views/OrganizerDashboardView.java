@@ -3,6 +3,7 @@ package com.example.vaadinproject.views;
 import com.example.vaadinproject.entities.Event;
 import com.example.vaadinproject.entities.ReservationStatus;
 import com.example.vaadinproject.entities.Status;
+import com.example.vaadinproject.entities.User;
 import com.example.vaadinproject.services.EventService;
 import com.example.vaadinproject.services.ReservationService;
 import com.example.vaadinproject.services.SessionService;
@@ -225,8 +226,22 @@ public class OrganizerDashboardView extends VerticalLayout implements BeforeEnte
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (!sessionService.isLoggedIn() || !sessionService.isOrganizer()) {
+        // Check if user is logged in
+        if (!sessionService.isLoggedIn()) {
             event.rerouteTo("login");
+            return;
+        }
+
+        User currentUser = sessionService.getCurrentUser();
+
+        if (currentUser == null) {
+            event.forwardTo("session-expired");
+            return;
+        }
+        // Check if user has organizer role
+        if (!currentUser.isOrganizer()) {
+            event.rerouteTo("unauthorized");
+            return;
         }
     }
 }

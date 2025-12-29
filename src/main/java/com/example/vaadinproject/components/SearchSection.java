@@ -33,10 +33,10 @@ public class SearchSection extends VerticalLayout {
         setAlignItems(FlexComponent.Alignment.CENTER);
         getStyle()
                 .set("background-color", "#D7C8A6")
-                .set("padding", "30px");
+                .set("padding", "30px")
+                .set("margin-top", "0");;
 
-        H3 searchTitle = new H3("Search Events");
-        searchTitle.getStyle().set("margin-top", "0");
+
 
         // Search input
         searchField = new TextField();
@@ -65,7 +65,7 @@ public class SearchSection extends VerticalLayout {
         dateFilter.setWidth("200px");
 
         searchButton = new Button("Search");
-        searchButton.getStyle().set("background", "#5C6F2B")
+        searchButton.getStyle().set("background", "#9B4B33")
                 .set("color", "white");
         searchButton.getStyle().set("margin-top", "30px");
         searchButton.addClickShortcut(Key.ENTER);
@@ -78,7 +78,7 @@ public class SearchSection extends VerticalLayout {
 
         filters.add(categoryFilter, cityFilter, dateFilter, searchButton, clearButton);
 
-        add(searchTitle, searchField, filters);
+        add( searchField, filters);
     }
 
     // Method to set search listener from parent view

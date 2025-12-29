@@ -48,10 +48,10 @@ public class HomeView extends VerticalLayout {
         // Add this after eventsSection initialization, before add() method
 
 
-        Button discoverButton = new Button("Discover All Events");
+        Button discoverButton = new Button("Discover All Events ↠ ");
         discoverButton.getStyle()
-                .set("background-color", "#974C32")
-                .set("color", "white")
+                .set("background-color", "white")
+                .set("color", "#9C4B36")
                 .set("font-size", "1.2em")
                 .set("padding", "15px 40px")
                 .set("border-radius", "8px")

@@ -158,7 +158,7 @@ public class EventCard extends HorizontalLayout {
 
         Button detailsBtn = new Button("View Details");
         detailsBtn.getStyle().set("color", "white")
-                .set("background-color", "#5E6E28");
+                .set("background-color", "#2E3E51");
         detailsBtn.addClickListener(e -> {
             if (detailsClickListener != null) {
                 detailsClickListener.accept(event);

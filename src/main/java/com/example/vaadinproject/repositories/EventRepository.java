@@ -27,6 +27,22 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByStatutAndCategorie(Status statut, Category categorie);
 
     List<Event> findByVilleIgnoreCase(String ville);
+    // Filter by organizer and status
+    List<Event> findByOrganisateurIdAndStatut(Long organizerId, Status statut);
+
+    // Filter by organizer and category
+    List<Event> findByOrganisateurIdAndCategorie(Long organizerId, Category categorie);
+
+    // Complex query for multiple filters
+    @Query("select e from Event e " +
+            "where e.organisateur.id = :organizerId " +
+            "and (:statut is null or e.statut = :statut) " +
+            "and (:categorie is null or e.categorie = :categorie)")
+    List<Event> findByOrganizerWithFilters(
+            @Param("organizerId") Long organizerId,
+            @Param("statut") Status statut,
+            @Param("categorie") Category categorie
+    );
 
     /* ===== PUBLIC EVENTS ===== */
     @Query("""

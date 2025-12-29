@@ -31,7 +31,9 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
         this.sessionService = sessionService;
 
         addClassName("event-list-view");
-        setSizeFull();
+        setWidthFull();
+        setPadding(true);
+        setSpacing(true);
 
         configureGrid();
         configureForm();
@@ -41,14 +43,7 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
         updateList();
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        // Allow both organizers and admins
-        if (!sessionService.isLoggedIn() ||
-                (!sessionService.isOrganizer() && !sessionService.isAdmin())) {
-            event.rerouteTo("login");
-        }
-    }
+
 
     private void updateList() {
         User currentUser = sessionService.getCurrentUser();
@@ -177,7 +172,8 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
 
     private void configureGrid() {
         grid.addClassName("event-grid");
-        grid.setSizeFull();
+        grid.setWidthFull();  // Changed from setSizeFull()
+        grid.setHeight("600px");
 
         grid.addColumn(Event::getTitre)
                 .setHeader("Titre")
@@ -260,4 +256,21 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
         form.setVisible(true);
         addClassName("editing");
     }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        // Allow both organizers and admins
+        if (!sessionService.isLoggedIn() ||
+                (!sessionService.isOrganizer() && !sessionService.isAdmin())) {
+            event.rerouteTo("unauthorized");
+        }
+        User currentUser = sessionService.getCurrentUser();
+
+        if (currentUser == null) {
+            event.forwardTo("session-expired");
+            return;
+        }
+    }
+
+
 }

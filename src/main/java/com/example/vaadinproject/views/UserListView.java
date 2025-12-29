@@ -37,23 +37,20 @@ public class UserListView extends VerticalLayout implements BeforeEnterObserver 
         this.sessionService = sessionService;
         this.userService = userService;
 
-        setSizeFull();
+        setWidthFull();  //
+        setPadding(true);
+        setSpacing(true);
         configureGrid();
         add(getToolbar(), grid);
         updateList();
     }
 
-    @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        User currentUser = sessionService.getCurrentUser();
-        if (currentUser == null || !currentUser.isAdmin()) {
-            event.forwardTo("login");
-        }
-    }
+
 
     private void configureGrid() {
         grid.addClassName("user-grid");
-        grid.setSizeFull();
+        grid.setWidthFull();  // Changed from setSizeFull()
+        grid.setHeight("600px");
 
         grid.addColumn(User::getId).setHeader("ID").setSortable(true);
         grid.addColumn(User::getNomComplet).setHeader("Nom Complet").setSortable(true);
@@ -202,5 +199,24 @@ public class UserListView extends VerticalLayout implements BeforeEnterObserver 
         HorizontalLayout buttons = new HorizontalLayout(confirmButton, cancelButton);
         confirmDialog.add(buttons);
         confirmDialog.open();
+    }
+
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        User currentUser = sessionService.getCurrentUser();
+        // Check for null FIRST
+        if (currentUser == null) {
+            event.forwardTo("session-expired");
+            return;
+        }
+        if (!sessionService.isLoggedIn() ||
+                (!sessionService.isAdmin())) {
+            event.rerouteTo("unauthorized");
+        }
+        // Now safe to check admin status
+        if (!currentUser.isAdmin()) {
+            event.forwardTo("login");
+        }
     }
 }

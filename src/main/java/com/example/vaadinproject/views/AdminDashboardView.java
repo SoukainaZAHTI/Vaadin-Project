@@ -3,6 +3,7 @@ package com.example.vaadinproject.views;
 import com.example.vaadinproject.entities.ReservationStatus;
 import com.example.vaadinproject.entities.Role;
 import com.example.vaadinproject.entities.Status;
+import com.example.vaadinproject.entities.User;
 import com.example.vaadinproject.services.EventService;
 import com.example.vaadinproject.services.ReservationService;
 import com.example.vaadinproject.services.SessionService;
@@ -114,8 +115,18 @@ public class AdminDashboardView extends VerticalLayout implements BeforeEnterObs
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (!sessionService.isLoggedIn() || !sessionService.isAdmin()) {
+        // Check if user is logged in
+        if (!sessionService.isLoggedIn()) {
             event.rerouteTo("login");
+            return;
+        }
+
+        User currentUser = sessionService.getCurrentUser();
+
+        // Check if user has admin role
+        if (!currentUser.isAdmin()) {
+            event.rerouteTo("unauthorized");
+            return;
         }
     }
 }

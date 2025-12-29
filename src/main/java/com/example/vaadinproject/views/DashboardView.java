@@ -1,5 +1,6 @@
 package com.example.vaadinproject.views;
 
+import com.example.vaadinproject.entities.User;
 import com.example.vaadinproject.services.SessionService;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -30,9 +31,16 @@ public class DashboardView extends VerticalLayout implements BeforeEnterObserver
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        // Check if user is logged in and has client role
-        if (!sessionService.isLoggedIn() || !sessionService.isClient()) {
+        if (!sessionService.isLoggedIn()) {
             event.rerouteTo("login");
+            return;
+        }
+
+        User currentUser = sessionService.getCurrentUser();
+
+        if (!currentUser.isClient()) {
+            event.rerouteTo("unauthorized");
+            return;
         }
     }
 }

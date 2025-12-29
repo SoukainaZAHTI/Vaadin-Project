@@ -33,12 +33,30 @@ public class AllEventsView extends VerticalLayout {
 
 
         setSizeFull();
-        setPadding(true);
-        setSpacing(true);
+        setPadding(false);  // Remove padding
+        setSpacing(false);   // Remove spacing
         setAlignItems(Alignment.CENTER);
 
-        H2 title = new H2("Discover All Events");
-        title.getStyle().set("color", "#333").set("margin-bottom", "30px");
+        VerticalLayout titleSection = new VerticalLayout();
+        titleSection.setWidthFull();
+        titleSection.setPadding(true);
+        titleSection.setAlignItems(Alignment.CENTER);
+        titleSection.getStyle()
+                .set("background-color", "#D6C7A5")
+                .set("margin", "0")
+                .set("padding", "30px 20px")
+                .set("margin-top", "0");
+
+
+        H2 title = new H2("Find Your Next Event");
+        title.getStyle()
+                .set("color", "#333")
+                .set("margin", "0")
+                .set("font-family", "Josefin Sans")
+                .set("border", "2px solid #333")
+                .set("padding", "10px 20px");
+
+        titleSection.add(title);
 
         cardsContainer = new VerticalLayout();
         cardsContainer.setWidthFull();
@@ -46,7 +64,7 @@ public class AllEventsView extends VerticalLayout {
         cardsContainer.setPadding(false);
         cardsContainer.setSpacing(true);
 
-        add(title, searchSection, cardsContainer);
+        add(titleSection, searchSection, cardsContainer);
 
         loadEvents(null, null, null, null); // Load all events initially
         }

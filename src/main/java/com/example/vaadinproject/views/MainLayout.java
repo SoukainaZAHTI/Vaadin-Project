@@ -10,6 +10,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -36,13 +37,58 @@ public class MainLayout extends AppLayout {
 
     }
 
+    @Override
+    public void setContent(Component content) {
+        // Content wrapper
+        Div contentArea = new Div(content);
+        contentArea.getStyle()
+                .set("flex", "0 0 auto")
+                .set("width", "100%");
+
+        // Footer - FIX: Use box-sizing to include padding in width calculation
+        Div footer = new Div();
+        footer.getStyle()
+                .set("background-color", "#2c3e50")
+                .set("color", "white")
+                .set("padding", "20px")
+                .set("text-align", "center")
+                .set("width", "100%")
+                .set("box-sizing", "border-box")
+                .set("flex-shrink", "0")
+                .set("margin-top", "auto");
+
+        Span footerText = new Span("© 2025 EventHub - All Rights Reserved");
+        footerText.getStyle()
+                .set("font-size", "16px")
+                .set("display", "block");
+
+        footer.add(footerText);
+
+        // Main wrapper - Also ensure no overflow
+        VerticalLayout wrapper = new VerticalLayout();
+        wrapper.setPadding(false);
+        wrapper.setSpacing(false);
+        wrapper.setMargin(false);
+        wrapper.getStyle()
+                .set("display", "flex")
+                .set("flex-direction", "column")
+                .set("min-height", "100vh")
+                .set("width", "100%")
+                .set("overflow-x", "hidden");  // ADD THIS - prevents horizontal scroll
+
+        wrapper.add(contentArea, footer);
+
+        super.setContent(wrapper);
+    }
+
     private RouterLink createStyledLink(String text, Class<? extends Component> navigationTarget) {
         RouterLink link = new RouterLink(text, navigationTarget);
 
         // Basic styling
         link.getStyle()
                 .set("color", "#333")
-                .set("font-size", "bold")
+                .set("font-weight", "bold")
+                .set("font-size", "16px")
                 .set("text-decoration", "none")          // Remove underline
                 .set("padding", "10px 15px")             // Padding
                 .set("border-radius", "8px")             // Rounded corners
@@ -75,7 +121,6 @@ public class MainLayout extends AppLayout {
     private void createBreadcrumb() {
         breadcrumb = new Breadcrumb();
         breadcrumb.setWidthFull();
-        setContent(breadcrumb); // This will be replaced by actual content in views
     }
 
     public Breadcrumb getBreadcrumb() {
@@ -118,7 +163,7 @@ public class MainLayout extends AppLayout {
         } else {
             Button loginBtn = new Button("Login", VaadinIcon.SIGN_IN.create());
             loginBtn.getStyle().set("color", "white")
-                    .set("background-color", "#5E6E28");
+                    .set("background-color", "#2E3E51");
             loginBtn.addClickListener(e -> navigationManager.navigateToLogin());
 
             Button registerBtn = new Button("Register", VaadinIcon.USER.create());
@@ -159,7 +204,6 @@ public class MainLayout extends AppLayout {
         VerticalLayout drawerContent = new VerticalLayout();
         drawerContent.setPadding(true);
         drawerContent.setSpacing(true);
-
         // Common menu items for everyone
         RouterLink homeLink = createStyledLink("🏠 Home", HomeView.class);
 
@@ -174,8 +218,7 @@ public class MainLayout extends AppLayout {
                 drawerContent.add(dashboardLink, usersLink, allEventsLink);
             } else if (sessionService.isOrganizer()) {
                 RouterLink dashboardLink = createStyledLink("📊 Dashboard", OrganizerDashboardView.class);
-                RouterLink myEventsLink = createStyledLink("📅 My Events", EventListView.class);
-                drawerContent.add(dashboardLink, myEventsLink);
+                RouterLink myEventsLink = createStyledLink("📅 My Events", EventListView.class);                drawerContent.add(dashboardLink, myEventsLink);
             } else if (sessionService.isClient()) {
                 RouterLink dashboardLink = createStyledLink("📊 Dashboard", DashboardView.class);
                 RouterLink myBookingsLink = createStyledLink("🎫 My Bookings", HomeView.class); // TODO: Create BookingsView
