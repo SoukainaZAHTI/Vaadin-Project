@@ -169,7 +169,7 @@ public class RegisterView extends HorizontalLayout {
             }
 
             // Validate password length
-            if (password.getValue().length() < 8) {
+            if (password.getValue().length() < 6) {
                 Notification.show("Password must be at least 8 characters")
                         .addThemeVariants(NotificationVariant.LUMO_ERROR);
                 return;

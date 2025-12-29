@@ -82,6 +82,8 @@ public class MainLayout extends AppLayout {
         return breadcrumb;
     }
 
+
+
     private void createHeader() {
         Image logo = new Image("https://github.com/SoukainaZAHTI/Resources/blob/main/logo.png?raw=true", "EventHub Logo");
         logo.setHeight("20%"); // Reduced height for better header proportions

@@ -34,7 +34,7 @@ public class User {
     private String email;
 
     @NotBlank(message = "Le mot de passe est obligatoire")
-    @Size(min = 8, message = "Le mot de passe doit contenir au moins 8 caractères")
+    @Size(min = 6, message = "Le mot de passe doit contenir au moins 6 caractères")
     @Column(nullable = false)
     private String password;
 

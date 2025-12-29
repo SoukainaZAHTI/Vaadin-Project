@@ -2,6 +2,7 @@ package com.example.vaadinproject.services;
 
 import com.example.vaadinproject.entities.*;
 import com.example.vaadinproject.repositories.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,9 +13,12 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+
+    public UserService(UserRepository userRepository,  PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> findAllUsers(String filterText) {
@@ -34,6 +38,10 @@ public class UserService {
     }
 
     public User saveUser(User user) {
+        // Hash password if it's a new user or password has changed
+        if (user.getId() == null || !user.getPassword().startsWith("$2a$")) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         return userRepository.save(user);
     }
 
@@ -43,7 +51,9 @@ public class UserService {
 
     public Optional<User> login(String email, String password) {
         Optional<User> user = userRepository.findByEmail(email);
-        if (user.isPresent() && user.get().getPassword().equals(password) && user.get().getActif()) {
+        if (user.isPresent() &&
+                passwordEncoder.matches(password, user.get().getPassword()) &&
+                user.get().getActif()) {
             return user;
         }
         return Optional.empty();
@@ -92,7 +102,7 @@ public class UserService {
     public User changePassword(Long userId, String newPassword) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        user.setPassword(newPassword);
+        user.setPassword(passwordEncoder.encode(newPassword));
         return userRepository.save(user);
     }
 

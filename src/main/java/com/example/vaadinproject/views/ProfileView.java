@@ -25,6 +25,7 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Route(value = "profile", layout = MainLayout.class)
 @PageTitle("Profile")
@@ -32,6 +33,8 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
 
     private final UserService userService;
     private final SessionService sessionService;
+    private final PasswordEncoder passwordEncoder;
+
 
     // Personal Information Form
     private TextField nom = new TextField("First Name");
@@ -53,9 +56,11 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
     private User currentUser;
     private UserService.UserProfileData profileData; // ADD THIS LINE
 
-    public ProfileView(UserService userService, SessionService sessionService) {
+    public ProfileView(UserService userService, SessionService sessionService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.sessionService = sessionService;
+        this.passwordEncoder = passwordEncoder;
+
 
         addClassName("profile-view");
         setSizeFull();
@@ -375,14 +380,15 @@ public class ProfileView extends VerticalLayout implements BeforeEnterObserver {
             return;
         }
 
-        if (!currentUser.getPassword().equals(current)) {
+        if (!passwordEncoder.matches(current, currentUser.getPassword())) {
+
             Notification.show("Current password is incorrect")
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return;
         }
 
-        if (newPwd.length() < 8) {
-            Notification.show("New password must be at least 8 characters")
+        if (newPwd.length() < 6) {
+            Notification.show("New password must be at least 6 characters")
                     .addThemeVariants(NotificationVariant.LUMO_ERROR);
             return;
         }
