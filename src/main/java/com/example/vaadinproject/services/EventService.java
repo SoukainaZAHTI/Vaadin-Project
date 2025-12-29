@@ -116,5 +116,11 @@ public class EventService {
     public Optional<Event> getEventById(Long id) {
         return eventRepository.findById(id);
     }
+
+
+    @Transactional(readOnly = true)
+    public List<Event> findByOrganisateurId(Long organisateurId) {
+        return eventRepository.findByOrganisateurId(organisateurId);
+    }
 }
 

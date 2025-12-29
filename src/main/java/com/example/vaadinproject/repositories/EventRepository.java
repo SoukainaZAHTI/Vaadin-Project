@@ -4,6 +4,7 @@ import com.example.vaadinproject.entities.Category;
 import com.example.vaadinproject.entities.Event;
 import com.example.vaadinproject.entities.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -58,4 +59,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                    @Param("ville") String ville,
                                    @Param("dateStart") LocalDateTime dateStart,
                                    @Param("dateEnd") LocalDateTime dateEnd);
+
+
+    @Modifying
+    @Query("UPDATE Event e SET e.placesDisponibles = :places WHERE e.id = :eventId")
+    void updatePlacesDisponibles(@Param("eventId") Long eventId, @Param("places") Integer places);
 }

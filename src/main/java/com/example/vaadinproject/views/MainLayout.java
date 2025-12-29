@@ -205,23 +205,25 @@ public class MainLayout extends AppLayout {
         drawerContent.setPadding(true);
         drawerContent.setSpacing(true);
         // Common menu items for everyone
-        RouterLink homeLink = createStyledLink("🏠 Home", HomeView.class);
+        RouterLink homeLink = createStyledLink(" Home", HomeView.class);
 
         drawerContent.add(homeLink);
 
         // Role-based menu items
         if (sessionService.isLoggedIn()) {
             if (sessionService.isAdmin()) {
-                RouterLink dashboardLink = createStyledLink("📊 Admin Dashboard", AdminDashboardView.class);
-                RouterLink usersLink = createStyledLink("👥 Manage Users", UserListView.class);
-                RouterLink allEventsLink = createStyledLink("📅 All Events", EventListView.class);
-                drawerContent.add(dashboardLink, usersLink, allEventsLink);
+                RouterLink dashboardLink = createStyledLink(" Admin Dashboard", AdminDashboardView.class);
+                RouterLink usersLink = createStyledLink("Manage Users", UserListView.class);
+                RouterLink allEventsLink = createStyledLink(" All Events", EventListView.class);
+                RouterLink allRessLink = createStyledLink(" All Reservations", AllReservationsView.class);
+
+                drawerContent.add(dashboardLink, usersLink, allEventsLink, allRessLink);
             } else if (sessionService.isOrganizer()) {
-                RouterLink dashboardLink = createStyledLink("📊 Dashboard", OrganizerDashboardView.class);
-                RouterLink myEventsLink = createStyledLink("📅 My Events", EventListView.class);                drawerContent.add(dashboardLink, myEventsLink);
+                RouterLink dashboardLink = createStyledLink(" Dashboard", OrganizerDashboardView.class);
+                RouterLink myEventsLink = createStyledLink("My Events", EventListView.class);                drawerContent.add(dashboardLink, myEventsLink);
             } else if (sessionService.isClient()) {
-                RouterLink dashboardLink = createStyledLink("📊 Dashboard", DashboardView.class);
-                RouterLink myBookingsLink = createStyledLink("🎫 My Bookings", HomeView.class); // TODO: Create BookingsView
+                RouterLink dashboardLink = createStyledLink(" Dashboard", DashboardView.class);
+                RouterLink myBookingsLink = createStyledLink(" My Bookings", MyReservationsView.class);
                 drawerContent.add(dashboardLink, myBookingsLink);
             }
         }

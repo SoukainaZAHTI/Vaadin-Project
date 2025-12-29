@@ -71,7 +71,7 @@ public class Event {
     @JoinColumn(name = "organisateur_id")
     private User organisateur;
 
-    @OneToMany(mappedBy = "evenement", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "evenement", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Reservation> reservations = new ArrayList<>();
 
     @Column(name = "places_disponibles")
@@ -162,9 +162,12 @@ public class Event {
     }
 
 
-public Integer getPlacesDisponibles() {
-    return placesDisponibles;
-}
+    public Integer getPlacesDisponibles() {
+        if (placesDisponibles == null) {
+            return capaciteMax - getPlacesReservees();
+        }
+        return placesDisponibles;
+    }
     public void setPlacesDisponibles(Integer placesDisponibles) {
         this.placesDisponibles = placesDisponibles;
     }
