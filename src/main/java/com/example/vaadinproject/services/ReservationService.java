@@ -4,10 +4,13 @@ import com.example.vaadinproject.entities.*;
 import com.example.vaadinproject.exceptions.ReservationException;
 import com.example.vaadinproject.repositories.EventRepository;
 import com.example.vaadinproject.repositories.ReservationRepository;
+import jakarta.persistence.EntityManager;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -15,6 +18,7 @@ import java.util.Random;
 @Service
 @Transactional
 public class ReservationService {
+    private EntityManager entityManager;  // Add this
 
     private final ReservationRepository reservationRepository;
     private final EventRepository eventRepository;  // ADD THIS LINE
@@ -130,5 +134,19 @@ public class ReservationService {
     // Find by reservation code
     public Optional<Reservation> findByCode(String code) {
         return reservationRepository.findByCodeReservation(code);
+    }
+
+    public List<Reservation> findAllWithDetails() {
+        return reservationRepository.findAllWithDetails();
+    }
+
+    public List<Reservation> findByEventIdsWithDetails(List<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return reservationRepository.findByEventIdsWithDetails(eventIds);
+    }
+    public List<Reservation> findByUtilisateurId(Long utilisateurId) {
+        return reservationRepository.findByUtilisateurId(utilisateurId);
     }
 }

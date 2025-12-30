@@ -16,7 +16,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.server.VaadinSession;
 
 public class MainLayout extends AppLayout {
@@ -81,35 +81,6 @@ public class MainLayout extends AppLayout {
         super.setContent(wrapper);
     }
 
-    private RouterLink createStyledLink(String text, Class<? extends Component> navigationTarget) {
-        RouterLink link = new RouterLink(text, navigationTarget);
-
-        // Basic styling
-        link.getStyle()
-                .set("color", "#333")
-                .set("font-weight", "bold")
-                .set("font-size", "16px")
-                .set("text-decoration", "none")          // Remove underline
-                .set("padding", "10px 15px")             // Padding
-                .set("border-radius", "8px")             // Rounded corners
-                .set("display", "block")                 // Full width
-                .set("transition", "all 0.3s ease");     // Smooth transition
-
-        // Hover effect
-        link.getElement().addEventListener("mouseenter", e -> {
-            link.getStyle()
-                    .set("background-color", "#e3f2fd")  // Light blue background
-                    .set("color", "#1976d2");            // Blue text
-        });
-
-        link.getElement().addEventListener("mouseleave", e -> {
-            link.getStyle()
-                    .set("background-color", "transparent")
-                    .set("color", "#333");
-        });
-
-        return link;
-    }
 
 
 
@@ -203,31 +174,37 @@ public class MainLayout extends AppLayout {
     private void createDrawer() {
         VerticalLayout drawerContent = new VerticalLayout();
         drawerContent.setPadding(true);
-        drawerContent.setSpacing(true);
-        // Common menu items for everyone
-        RouterLink homeLink = createStyledLink(" Home", HomeView.class);
+        drawerContent.setSpacing(false);
 
-        drawerContent.add(homeLink);
+        // Common menu items for everyone
+        SideNavItem homeItem = createMenuItem("Home", VaadinIcon.HOME, HomeView.class);
+        drawerContent.add(homeItem);
 
         // Role-based menu items
         if (sessionService.isLoggedIn()) {
             if (sessionService.isAdmin()) {
-                RouterLink dashboardLink = createStyledLink(" Admin Dashboard", AdminDashboardView.class);
-                RouterLink usersLink = createStyledLink("Manage Users", UserListView.class);
-                RouterLink allEventsLink = createStyledLink(" All Events", EventListView.class);
-                RouterLink allRessLink = createStyledLink(" All Reservations", AllReservationsView.class);
+                SideNavItem dashboardItem = createMenuItem("Admin Dashboard", VaadinIcon.DASHBOARD, AdminDashboardView.class);
+                SideNavItem usersItem = createMenuItem("Manage Users", VaadinIcon.USERS, UserListView.class);
+                SideNavItem allEventsItem = createMenuItem("All Events", VaadinIcon.CALENDAR, EventListView.class);
+                SideNavItem allRessItem = createMenuItem("All Reservations", VaadinIcon.LIST, AllReservationsView.class);
 
-                drawerContent.add(dashboardLink, usersLink, allEventsLink, allRessLink);
+                drawerContent.add(dashboardItem, usersItem, allEventsItem, allRessItem);
             } else if (sessionService.isOrganizer()) {
-                RouterLink dashboardLink = createStyledLink(" Dashboard", OrganizerDashboardView.class);
-                RouterLink myEventsLink = createStyledLink("My Events", EventListView.class);                drawerContent.add(dashboardLink, myEventsLink);
+                SideNavItem dashboardItem = createMenuItem("Dashboard", VaadinIcon.DASHBOARD, OrganizerDashboardView.class);
+                SideNavItem myEventsItem = createMenuItem("My Events", VaadinIcon.CALENDAR_USER, EventListView.class);
+                drawerContent.add(dashboardItem, myEventsItem);
             } else if (sessionService.isClient()) {
-                RouterLink dashboardLink = createStyledLink(" Dashboard", DashboardView.class);
-                RouterLink myBookingsLink = createStyledLink(" My Bookings", MyReservationsView.class);
-                drawerContent.add(dashboardLink, myBookingsLink);
+                SideNavItem dashboardItem = createMenuItem("Dashboard", VaadinIcon.DASHBOARD, DashboardView.class);
+                SideNavItem myBookingsItem = createMenuItem("My Bookings", VaadinIcon.BOOK, MyReservationsView.class);
+                drawerContent.add(dashboardItem, myBookingsItem);
             }
         }
 
         addToDrawer(drawerContent);
+    }
+
+    private SideNavItem createMenuItem(String text, VaadinIcon icon, Class<? extends Component> navigationTarget) {
+        SideNavItem menuItem = new SideNavItem(text, navigationTarget, icon.create());
+        return menuItem;
     }
 }

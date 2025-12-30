@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -22,6 +23,8 @@ import jakarta.annotation.security.RolesAllowed;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
+import static com.example.vaadinproject.entities.Status.TERMINE;
 
 @Route(value = "organizer", layout = MainLayout.class)
 @PageTitle("Organizer Dashboard")
@@ -42,11 +45,13 @@ public class OrganizerDashboardView extends VerticalLayout implements BeforeEnte
         setSizeFull();
         setPadding(true);
         setSpacing(true);
+    }
 
+    private void buildDashboard(User currentUser) {
         H2 title = new H2("Organizer Dashboard");
         add(title);
 
-        Long organizerId = sessionService.getCurrentUser().getId();
+        Long organizerId = currentUser.getId();
 
         // Get organizer's events
         List<Event> organizerEvents = eventService.findEventsByOrganizer(organizerId);
@@ -63,7 +68,7 @@ public class OrganizerDashboardView extends VerticalLayout implements BeforeEnte
                 .filter(e -> e.getStatut() == Status.ANNULE)
                 .count();
         long finishedEvents = organizerEvents.stream()
-                .filter(e -> e.getStatut() == Status.TERMINE)
+                .filter(e -> e.getStatut() == TERMINE)
                 .count();
 
         // Get event IDs for reservation queries
@@ -167,7 +172,7 @@ public class OrganizerDashboardView extends VerticalLayout implements BeforeEnte
                 .setHeader("City")
                 .setAutoWidth(true);
 
-        grid.addColumn(event -> {
+        grid.addColumn(new ComponentRenderer<>(event -> {
                     String status = event.getStatut().toString();
                     Span statusBadge = new Span(status);
 
@@ -201,7 +206,7 @@ public class OrganizerDashboardView extends VerticalLayout implements BeforeEnte
                             .set("font-weight", "bold");
 
                     return statusBadge;
-                })
+                }))
                 .setHeader("Status")
                 .setAutoWidth(true);
 
@@ -243,5 +248,9 @@ public class OrganizerDashboardView extends VerticalLayout implements BeforeEnte
             event.rerouteTo("unauthorized");
             return;
         }
+
+        // User is authorized, NOW build the dashboard
+        buildDashboard(currentUser);
     }
+
 }

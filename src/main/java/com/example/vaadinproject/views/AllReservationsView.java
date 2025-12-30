@@ -135,14 +135,11 @@ public class AllReservationsView extends VerticalLayout implements BeforeEnterOb
     private void loadReservations() {
         if (currentUser.getRole() == Role.ADMIN) {
             // Admin sees all reservations
-            allReservations = reservationService.findAll();
+            allReservations = reservationService.findAllWithDetails();
         } else {
             // Organizer only sees reservations for their events
             allReservations = getOrganizerReservations();
         }
-
-        // Initialize lazy-loaded fields to avoid LazyInitializationException
-        allReservations.forEach(this::initializeLazyFields);
 
         grid.setItems(allReservations);
     }
@@ -153,14 +150,10 @@ public class AllReservationsView extends VerticalLayout implements BeforeEnterOb
                 .map(Event::getId)
                 .collect(Collectors.toList());
 
-        return reservationService.findByEventIds(eventIds);
+        return reservationService.findByEventIdsWithDetails(eventIds);
     }
 
-    private void initializeLazyFields(Reservation reservation) {
-        // Force initialization of lazy-loaded fields
-        reservation.getEvenement().getTitre();
-        reservation.getUtilisateur().getNom();
-    }
+
 
     private void applyFilters() {
         List<Reservation> filtered = allReservations.stream()

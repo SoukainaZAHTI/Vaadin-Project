@@ -41,6 +41,7 @@ public class ReservationFilterPanel extends HorizontalLayout {
         searchField.setPlaceholder("Rechercher par code, utilisateur...");
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setWidth("300px");
+        searchField.getStyle().set("margin-top", "25px");
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> onFilterChange.run());
     }
@@ -64,6 +65,7 @@ public class ReservationFilterPanel extends HorizontalLayout {
     private Button createClearButton() {
         Button clearBtn = new Button("Réinitialiser", new Icon(VaadinIcon.REFRESH));
         clearBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        clearBtn.getStyle().set("margin-top", "37px");
         clearBtn.addClickListener(e -> clearFilters());
         return clearBtn;
     }

@@ -34,7 +34,8 @@ public class SearchSection extends VerticalLayout {
         getStyle()
                 .set("background-color", "#D7C8A6")
                 .set("padding", "30px")
-                .set("margin-top", "0");;
+                .set("margin-top", "0")
+                .set("margin-bottom", "20px");;
 
 
 
@@ -67,14 +68,15 @@ public class SearchSection extends VerticalLayout {
         searchButton = new Button("Search");
         searchButton.getStyle().set("background", "#9B4B33")
                 .set("color", "white");
-        searchButton.getStyle().set("margin-top", "30px");
+        searchButton.getStyle().set("margin-top", "37px");
         searchButton.addClickShortcut(Key.ENTER);
         searchButton.addClickListener(e -> performSearch());
 
         Button clearButton = new Button("Clear");
         clearButton.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
-        clearButton.getStyle().set("margin-top", "30px");
+        clearButton.getStyle().set("margin-top", "37px");
         clearButton.addClickListener(e -> clearFilters());
+
 
         filters.add(categoryFilter, cityFilter, dateFilter, searchButton, clearButton);
 

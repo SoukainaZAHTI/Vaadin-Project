@@ -15,10 +15,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByStatut(ReservationStatus statut);
     @Query("SELECT r FROM Reservation r WHERE r.evenement.id IN :eventIds")
     List<Reservation> findByEventIds(@Param("eventIds") List<Long> eventIds);
-    List<Reservation> findByUtilisateurId(Long utilisateurId);
     Optional<Reservation> findByCodeReservation(String codeReservation);
     boolean existsByCodeReservation(String codeReservation);
 
+    @Query("SELECT r FROM Reservation r " +
+            "LEFT JOIN FETCH r.evenement " +
+            "LEFT JOIN FETCH r.utilisateur " +
+            "WHERE r.utilisateur.id = :utilisateurId")
+    List<Reservation> findByUtilisateurId(@Param("utilisateurId") Long utilisateurId);
 
     @Query("SELECT DISTINCT r FROM Reservation r " +
             "LEFT JOIN FETCH r.evenement " +

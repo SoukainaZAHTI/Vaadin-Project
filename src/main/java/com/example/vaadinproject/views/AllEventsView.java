@@ -42,7 +42,7 @@ public class AllEventsView extends VerticalLayout {
         titleSection.setPadding(true);
         titleSection.setAlignItems(Alignment.CENTER);
         titleSection.getStyle()
-                .set("background-color", "#D6C7A5")
+                .set("background-color", "#964B2E")
                 .set("margin", "0")
                 .set("padding", "30px 20px")
                 .set("margin-top", "0");
@@ -50,10 +50,9 @@ public class AllEventsView extends VerticalLayout {
 
         H2 title = new H2("Find Your Next Event");
         title.getStyle()
-                .set("color", "#333")
+                .set("color", "white")
                 .set("margin", "0")
                 .set("font-family", "Josefin Sans")
-                .set("border", "2px solid #333")
                 .set("padding", "10px 20px");
 
         titleSection.add(title);

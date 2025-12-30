@@ -24,7 +24,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 
-@Route("register")
+@Route(value = "register", layout =  MainLayout.class)
 @PageTitle("Register")
 @AnonymousAllowed
 public class RegisterView extends HorizontalLayout {
