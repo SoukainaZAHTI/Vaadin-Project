@@ -14,11 +14,13 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 
 import java.util.Optional;
 
 @Route(value = "login")
 @PageTitle("Login")
+@AnonymousAllowed
 public class LoginView extends VerticalLayout {
 
     private final UserService userService;

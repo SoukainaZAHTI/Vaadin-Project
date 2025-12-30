@@ -149,4 +149,8 @@ public class ReservationService {
     public List<Reservation> findByUtilisateurId(Long utilisateurId) {
         return reservationRepository.findByUtilisateurId(utilisateurId);
     }
+    public Integer calculateTotalPlacesReservees(Long eventId) {
+        return reservationRepository.countTotalPlacesReserveesByEvent(eventId);
+    }
+
 }

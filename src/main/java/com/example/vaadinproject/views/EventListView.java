@@ -1,5 +1,6 @@
 package com.example.vaadinproject.views;
 
+import com.example.vaadinproject.components.EventFilterComponent;
 import com.example.vaadinproject.entities.Event;
 import com.example.vaadinproject.entities.User;
 import com.example.vaadinproject.services.EventService;
@@ -16,14 +17,15 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import java.util.List;
+
 @Route(value = "events", layout = MainLayout.class)
 @PageTitle("Events")
 public class EventListView extends VerticalLayout implements BeforeEnterObserver {
 
     private final SessionService sessionService;
     private final Grid<Event> grid = new Grid<>(Event.class, false);
-    private final TextField filterText = new TextField();
-    EventForm form;
+    private EventFilterComponent filterComponent;    EventForm form;
     EventService service;
 
     public EventListView(EventService service, SessionService sessionService) {
@@ -38,11 +40,12 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
         configureGrid();
         configureForm();
 
-        add(getToolbar(), getContent());
+        filterComponent = new EventFilterComponent();
+        filterComponent.setFilterListener(this::handleFilter);
 
+        add(getToolbar(), filterComponent, getContent());
         updateList();
     }
-
 
 
     private void updateList() {
@@ -55,24 +58,35 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
 
         // Admins can see all events
         if (currentUser.isAdmin()) {
-            grid.setItems(service.findAllEvents(filterText.getValue()));
+            grid.setItems(service.findAllEvents(null));
         }
         // Organizers can only see their own events
         else if (currentUser.isOrganizer()) {
-            Long organizerId = currentUser.getId();
-
-            if (filterText.getValue() == null || filterText.getValue().isEmpty()) {
-                grid.setItems(service.findEventsByOrganizer(organizerId));
-            } else {
-                // Filter within organizer's own events
-                grid.setItems(
-                        service.findEventsByOrganizer(organizerId).stream()
-                                .filter(e -> e.getTitre().toLowerCase()
-                                        .contains(filterText.getValue().toLowerCase()))
-                                .toList()
-                );
-            }
+            grid.setItems(service.findEventsByOrganizer(currentUser.getId()));
         }
+    }
+    private void handleFilter(EventFilterComponent.FilterCriteria criteria) {
+        User currentUser = sessionService.getCurrentUser();
+
+        if (currentUser == null) {
+            grid.setItems();
+            return;
+        }
+
+        Long organizerId = currentUser.isOrganizer() ? currentUser.getId() : null;
+
+        List<Event> filteredEvents = service.filterEvents(
+                criteria.getKeyword(),
+                criteria.getCategory(),
+                criteria.getCity(),
+                criteria.getStartDate(),
+                criteria.getEndDate(),
+                criteria.getMinPrice(),
+                criteria.getMaxPrice(),
+                organizerId
+        );
+
+        grid.setItems(filteredEvents);
     }
 
     private void configureForm() {
@@ -224,26 +238,20 @@ public class EventListView extends VerticalLayout implements BeforeEnterObserver
     }
 
     private HorizontalLayout getToolbar() {
-        filterText.setPlaceholder("Filter by title...");
-        filterText.setClearButtonVisible(true);
-        filterText.setValueChangeMode(ValueChangeMode.LAZY);
-        filterText.addValueChangeListener(e -> updateList());
-
         Button addEventButton = new Button("Add Event");
         addEventButton.addClickListener(e -> addEvent());
 
-        // Only show "Add Event" button for organizers, not admins
+        // Only show "Add Event" button for organizers
         if (sessionService.getCurrentUser().isOrganizer()) {
             addEventButton.setVisible(true);
         } else {
             addEventButton.setVisible(false);
         }
 
-        HorizontalLayout toolbar = new HorizontalLayout(filterText, addEventButton);
+        HorizontalLayout toolbar = new HorizontalLayout(addEventButton);
         toolbar.addClassName("toolbar");
         return toolbar;
     }
-
     private void addEvent() {
         // Only organizers can add new events
         if (!sessionService.getCurrentUser().isOrganizer()) {

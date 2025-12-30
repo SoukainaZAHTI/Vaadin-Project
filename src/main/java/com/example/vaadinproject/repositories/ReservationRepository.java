@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,4 +36,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             "LEFT JOIN FETCH r.utilisateur " +
             "WHERE r.evenement.id IN :eventIds")
     List<Reservation> findByEventIdsWithDetails(@Param("eventIds") List<Long> eventIds);
+
+    @Query("SELECT COALESCE(SUM(r.nombrePlaces), 0) FROM Reservation r " +
+            "WHERE r.evenement.id = :eventId " +
+            "AND r.statut IN ('EN_ATTENTE', 'CONFIRMEE')")
+    Integer countTotalPlacesReserveesByEvent(@Param("eventId") Long eventId);
+    @Query("SELECT r FROM Reservation r " +
+            "WHERE r.dateReservation BETWEEN :startDate AND :endDate")
+    List<Reservation> findByDateReservationBetween(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }

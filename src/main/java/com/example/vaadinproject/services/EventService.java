@@ -122,5 +122,33 @@ public class EventService {
     public List<Event> findByOrganisateurId(Long organisateurId) {
         return eventRepository.findByOrganisateurId(organisateurId);
     }
+    public List<Event> filterEvents(String keyword, Category category, String city,
+                                    LocalDate startDate, LocalDate endDate,
+                                    Double minPrice, Double maxPrice, Long organizerId) {
+        List<Event> events;
+
+        // Get base list (all events or organizer's events)
+        if (organizerId != null) {
+            events = findEventsByOrganizer(organizerId);
+        } else {
+            events = findAllEvents(null);
+        }
+
+        // Apply filters
+        return events.stream()
+                .filter(e -> keyword == null || keyword.isEmpty() ||
+                        e.getTitre().toLowerCase().contains(keyword.toLowerCase()) ||
+                        (e.getDescription() != null && e.getDescription().toLowerCase().contains(keyword.toLowerCase())))
+                .filter(e -> category == null || e.getCategorie() == category)
+                .filter(e -> city == null || city.isEmpty() ||
+                        (e.getVille() != null && e.getVille().toLowerCase().contains(city.toLowerCase())))
+                .filter(e -> startDate == null || e.getDateDebut() == null ||
+                        !e.getDateDebut().toLocalDate().isBefore(startDate))
+                .filter(e -> endDate == null || e.getDateDebut() == null ||
+                        !e.getDateDebut().toLocalDate().isAfter(endDate))
+                .filter(e -> minPrice == null || e.getPrixUnitaire() == null || e.getPrixUnitaire() >= minPrice)
+                .filter(e -> maxPrice == null || e.getPrixUnitaire() == null || e.getPrixUnitaire() <= maxPrice)
+                .toList();
+    }
 }
 

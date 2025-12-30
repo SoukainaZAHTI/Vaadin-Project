@@ -36,8 +36,7 @@ public class RegisterView extends HorizontalLayout {
     TextField prenom = new TextField("Last Name");
     EmailField email = new EmailField("Email");
 
-    // REPLACE: PasswordField password = new PasswordField("Password");
-    // WITH:
+
     PasswordStrengthField password = new PasswordStrengthField("Password");
 
     PasswordField confirmPassword = new PasswordField("Confirm Password");

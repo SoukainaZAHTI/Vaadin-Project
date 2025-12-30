@@ -149,5 +149,7 @@ public class UserService {
         public int getReservationsCount() {
             return reservationsCount;
         }
+
+
     }
 }

@@ -41,7 +41,7 @@ public class ReservationFilterPanel extends HorizontalLayout {
         searchField.setPlaceholder("Rechercher par code, utilisateur...");
         searchField.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         searchField.setWidth("300px");
-        searchField.getStyle().set("margin-top", "25px");
+        searchField.getStyle().set("margin-top", "30px");
         searchField.setValueChangeMode(ValueChangeMode.LAZY);
         searchField.addValueChangeListener(e -> onFilterChange.run());
     }
